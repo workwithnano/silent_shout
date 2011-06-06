@@ -37,6 +37,7 @@
 
 - (IBAction)back:(id)sender;
 - (IBAction)doubleBack:(id)sender;
+- (IBAction)saveToCameraRoll:(id)sender;
 
 - (void)autoScrollWithText:(NSString *)userText;
 

@@ -78,6 +78,12 @@ static const int SCALE_MAX_FONT_SIZE = 360;
   
 }
 
+- (IBAction)saveToCameraRoll:(id)sender {
+  
+  UIImageWriteToSavedPhotosAlbum(bgImage.image, nil, nil, nil);
+  
+}
+
 //Add text to UIImage
 -(UIImage *)addTextToImage:(UIImage *)img withText:(char *)txt withFont:(char *)fnt withFontSize:(int)fntSize {
 
