@@ -28,33 +28,29 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
 
 + (NSString *) getFontNameFromSavedFontNumber:(int)fontNumber {
   
-  NSString * returnFontString;
-  
   switch (fontNumber) {
     case 0:
-      returnFontString = FONT_PENCIL;
+      return FONT_PENCIL;
       break;
     case 1:
-      returnFontString = FONT_DRYERASE;
+      return FONT_DRYERASE;
       break;
     case 2:
-      returnFontString = FONT_KEYBOARD;
+      return FONT_KEYBOARD;
       break;
     case 3:
-      returnFontString = FONT_KEYBOARD;
+      return FONT_KEYBOARD;
       break;
     case 4:
-      returnFontString = FONT_PENCIL;
+      return FONT_PENCIL;
       break;
     case 5:
-      returnFontString = FONT_MARKER;
+      return FONT_MARKER;
       break;
     default:
-      returnFontString = FONT_PAINTBRUSH;
+      return FONT_PAINTBRUSH;
       break;
   }
-  
-  return returnFontString;
   
 }
 
