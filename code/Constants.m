@@ -24,7 +24,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
   NSString * const FONT_QUILL = @"Scriptina";                 // Font #
   NSString * const FONT_PENCIL = @"Later On";                 // Font 0
   NSString * const FONT_PAINTBRUSH = @"DJ Gross";             // Font #
-  NSString * const FONT_DRYERASE = @"GraffitiPaintBrush";     // Font 1
+  NSString * const FONT_DRYERASE = @"Kristi";                 // Font 1
 
 + (NSString *) getFontNameFromSavedFontNumber:(int)fontNumber {
   
