@@ -154,6 +154,7 @@ static const CGFloat PRELOAD_SCROLLVIEW_OFFSET_Y = -200;
 	scrollView.clipsToBounds = YES;
 	scrollView.scrollEnabled = YES;
 	scrollView.pagingEnabled = YES;
+  scrollView.canCancelContentTouches = NO;
 	
 	CGFloat cx = 0;
   BOOL usingAnimation;
@@ -231,6 +232,11 @@ static const CGFloat PRELOAD_SCROLLVIEW_OFFSET_Y = -200;
 
 #pragma mark -
 #pragma mark UIScrollViewDelegate stuff
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  NSLog(@"touched");
+}
+
 - (void)scrollViewDidScroll:(UIScrollView *)_scrollView
 {
   if (pageControlIsChangingPage) {

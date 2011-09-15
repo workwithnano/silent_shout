@@ -31,6 +31,18 @@ static const CGFloat PRELOAD_SCROLLVIEW_OFFSET_Y = -200;
   [self addSettingArray:[NSArray arrayWithObjects:@"Postcard", @"icon-texture_whiteboard", nil]];
   // [self addSettingArray:[NSArray arrayWithObjects:@"Postcard", @"icon-texture_postcard", nil]];
   [self addSettingArray:[NSArray arrayWithObjects:@"Cardboard", @"icon-texture_cardboard", nil]];
+  [self addSettingArray:[NSArray arrayWithObjects:@"Camera", @"icon-texture_camera", nil]];
+  
+}
+
+- (void)addCameraButton
+{
+  
+  // Remove the camera button's pageControl dot
+  self.pageControl.numberOfPages = [[self settings] count] - 1;
+  
+  // Remove the camera from the totally draggable section
+  [scrollView setContentSize:CGSizeMake((scrollView.frame.size.width * self.pageControl.numberOfPages),scrollView.frame.size.height)];
   
 }
 
@@ -40,6 +52,8 @@ static const CGFloat PRELOAD_SCROLLVIEW_OFFSET_Y = -200;
 {
 	[self setupTexturesPage];
   [self setupSettingsPage];
+  [self addCameraButton];
+  
   [super viewDidLoad];
 }
 
