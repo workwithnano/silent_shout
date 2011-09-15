@@ -24,6 +24,10 @@
 		3F02E4F613491206001B0E7B /* icon-texture_whiteboard@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F02E4F413491206001B0E7B /* icon-texture_whiteboard@2x.png */; };
 		3F02E4FD1349124E001B0E7B /* bkgrd_texture-whiteboard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3F02E4F91349124E001B0E7B /* bkgrd_texture-whiteboard.jpg */; };
 		3F02E4FE1349124E001B0E7B /* bkgrd_texture-whiteboard@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3F02E4FA1349124E001B0E7B /* bkgrd_texture-whiteboard@2x.jpg */; };
+		3F16EA7F14219207000F9303 /* icon-texture_camera.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F16EA7D14219207000F9303 /* icon-texture_camera.png */; };
+		3F16EA8014219207000F9303 /* icon-texture_camera.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F16EA7D14219207000F9303 /* icon-texture_camera.png */; };
+		3F16EA8114219207000F9303 /* icon-texture_camera@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F16EA7E14219207000F9303 /* icon-texture_camera@2x.png */; };
+		3F16EA8214219207000F9303 /* icon-texture_camera@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F16EA7E14219207000F9303 /* icon-texture_camera@2x.png */; };
 		3F1D0312123D99A20061A518 /* TexturesSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3F1D0310123D99A20061A518 /* TexturesSettingsViewController.m */; };
 		3F24D98913087D4E004FD8E0 /* GraffitiPaintBrush.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3F24D98813087D4E004FD8E0 /* GraffitiPaintBrush.ttf */; };
 		3F24D98B13087D56004FD8E0 /* scriptina.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3F24D98A13087D56004FD8E0 /* scriptina.ttf */; };
@@ -194,6 +198,9 @@
 		3FC46A11131F3D98002339CB /* Scroll-Your-Note_00038@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3FC469E9131F3D98002339CB /* Scroll-Your-Note_00038@2x.png */; };
 		3FC46A12131F3D98002339CB /* Scroll-Your-Note_00039@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3FC469EA131F3D98002339CB /* Scroll-Your-Note_00039@2x.png */; };
 		3FCD2D2012ADD2AD003F16C8 /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 3FCD2D1F12ADD2AD003F16C8 /* Constants.m */; };
+		3FCDF91C139AEB0B00F03826 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
+		3FCDF91D139AEB0B00F03826 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
+		3FCDF91E139AEB0B00F03826 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765580DF743DE002DB57D /* CoreGraphics.framework */; };
 		3FD4338C133563B200599FC2 /* btns_doubleback_DOWN.png in Resources */ = {isa = PBXBuildFile; fileRef = 3FD43388133563AB00599FC2 /* btns_doubleback_DOWN.png */; };
 		3FD4338D133563B200599FC2 /* btns_doubleback_DOWN@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3FD43389133563AC00599FC2 /* btns_doubleback_DOWN@2x.png */; };
 		3FD4338E133563B200599FC2 /* btns_doubleback_UP.png in Resources */ = {isa = PBXBuildFile; fileRef = 3FD4338A133563AD00599FC2 /* btns_doubleback_UP.png */; };
@@ -366,6 +373,9 @@
 		3F02E4F413491206001B0E7B /* icon-texture_whiteboard@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon-texture_whiteboard@2x.png"; path = "../../assets/Icons/Textures/icon-texture_whiteboard@2x.png"; sourceTree = "<group>"; };
 		3F02E4F91349124E001B0E7B /* bkgrd_texture-whiteboard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "bkgrd_texture-whiteboard.jpg"; sourceTree = "<group>"; };
 		3F02E4FA1349124E001B0E7B /* bkgrd_texture-whiteboard@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "bkgrd_texture-whiteboard@2x.jpg"; sourceTree = "<group>"; };
+		3F16EA7B14219003000F9303 /* Silent Shout Beta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Silent Shout Beta.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F16EA7D14219207000F9303 /* icon-texture_camera.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon-texture_camera.png"; path = "../../assets/Icons/Textures/icon-texture_camera.png"; sourceTree = "<group>"; };
+		3F16EA7E14219207000F9303 /* icon-texture_camera@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon-texture_camera@2x.png"; path = "../../assets/Icons/Textures/icon-texture_camera@2x.png"; sourceTree = "<group>"; };
 		3F1D030F123D99A20061A518 /* TexturesSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TexturesSettingsViewController.h; sourceTree = "<group>"; };
 		3F1D0310123D99A20061A518 /* TexturesSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TexturesSettingsViewController.m; sourceTree = "<group>"; };
 		3F24D98813087D4E004FD8E0 /* GraffitiPaintBrush.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = GraffitiPaintBrush.ttf; path = ../assets/Fonts/Highlighter/GraffitiPaintBrush.ttf; sourceTree = SOURCE_ROOT; };
@@ -712,6 +722,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3FCDF917139AEB0B00F03826 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3FCDF91C139AEB0B00F03826 /* UIKit.framework in Frameworks */,
+				3FCDF91D139AEB0B00F03826 /* Foundation.framework in Frameworks */,
+				3FCDF91E139AEB0B00F03826 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -729,6 +749,7 @@
 			isa = PBXGroup;
 			children = (
 				1D6058910D05DD3D006BFB54 /* Silent Shout.app */,
+				3F16EA7B14219003000F9303 /* Silent Shout Beta.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -843,6 +864,8 @@
 		3F24D9BB13089119004FD8E0 /* Textures */ = {
 			isa = PBXGroup;
 			children = (
+				3F16EA7D14219207000F9303 /* icon-texture_camera.png */,
+				3F16EA7E14219207000F9303 /* icon-texture_camera@2x.png */,
 				3F959DD012DA105B00C35F6E /* icon-texture_cardboard.png */,
 				3F959DD112DA105B00C35F6E /* icon-texture_cardboard@2x.png */,
 				3F959DD212DA105B00C35F6E /* icon-texture_notecard.png */,
@@ -1364,6 +1387,23 @@
 			productReference = 1D6058910D05DD3D006BFB54 /* Silent Shout.app */;
 			productType = "com.apple.product-type.application";
 		};
+		3FCDF919139AEB0B00F03826 /* Silent Shout Beta */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3FCDF931139AEB0C00F03826 /* Build configuration list for PBXNativeTarget "Silent Shout Beta" */;
+			buildPhases = (
+				3FCDF916139AEB0B00F03826 /* Sources */,
+				3FCDF917139AEB0B00F03826 /* Frameworks */,
+				3FCDF918139AEB0B00F03826 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Silent Shout Beta";
+			productName = "Silent Shout Beta";
+			productReference = 3F16EA7B14219003000F9303 /* Silent Shout Beta.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1385,6 +1425,7 @@
 			projectRoot = "";
 			targets = (
 				1D6058900D05DD3D006BFB54 /* Silent Shout */,
+				3FCDF919139AEB0B00F03826 /* Silent Shout Beta */,
 			);
 		};
 /* End PBXProject section */
@@ -1707,6 +1748,17 @@
 				3F5237C5134920EF0005DF2E /* help_bubble-presentation@2x.png in Resources */,
 				3F5237C6134920EF0005DF2E /* help_bubble-writingtool.png in Resources */,
 				3F5237C7134920EF0005DF2E /* help_bubble-writingtool@2x.png in Resources */,
+				3F16EA7F14219207000F9303 /* icon-texture_camera.png in Resources */,
+				3F16EA8114219207000F9303 /* icon-texture_camera@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3FCDF918139AEB0B00F03826 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3F16EA8014219207000F9303 /* icon-texture_camera.png in Resources */,
+				3F16EA8214219207000F9303 /* icon-texture_camera@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1734,6 +1786,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3FCDF916139AEB0B00F03826 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -1750,7 +1809,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Silent_Shout__Utility__Prefix.pch;
 				INFOPLIST_FILE = "Silent_Shout__Utility_-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "Silent Shout";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1768,7 +1827,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Silent_Shout__Utility__Prefix.pch;
 				INFOPLIST_FILE = "Silent_Shout__Utility_-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "Silent Shout";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1808,11 +1867,68 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Silent_Shout__Utility__Prefix.pch;
 				INFOPLIST_FILE = "Silent_Shout__Utility_-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "Silent Shout";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				VALIDATE_PRODUCT = YES;
+			};
+			name = "Ad Hoc";
+		};
+		3FCDF92E139AEB0C00F03826 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Silent Shout Beta/Silent Shout Beta-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				INFOPLIST_FILE = "Silent Shout Beta/Silent Shout Beta-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		3FCDF92F139AEB0C00F03826 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Silent Shout Beta/Silent Shout Beta-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				INFOPLIST_FILE = "Silent Shout Beta/Silent Shout Beta-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		3FCDF930139AEB0C00F03826 /* Ad Hoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Silent Shout Beta/Silent Shout Beta-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				INFOPLIST_FILE = "Silent Shout Beta/Silent Shout Beta-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
 			};
 			name = "Ad Hoc";
 		};
@@ -1863,6 +1979,16 @@
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
 				3F81CF4812A352B200A07010 /* Ad Hoc */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3FCDF931139AEB0C00F03826 /* Build configuration list for PBXNativeTarget "Silent Shout Beta" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3FCDF92E139AEB0C00F03826 /* Debug */,
+				3FCDF92F139AEB0C00F03826 /* Release */,
+				3FCDF930139AEB0C00F03826 /* Ad Hoc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
