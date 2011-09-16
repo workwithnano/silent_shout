@@ -12,7 +12,7 @@
 @protocol FlipsideViewControllerDelegate;
 
 
-@interface FlipsideViewController : UIViewController {
+@interface FlipsideViewController : UIViewController <UIActionSheetDelegate> {
 	id <FlipsideViewControllerDelegate> delegate;
   NSString* userInputText;
   IBOutlet AutoScrollLabel* textView;
@@ -37,9 +37,10 @@
 
 - (IBAction)back:(id)sender;
 - (IBAction)doubleBack:(id)sender;
-- (IBAction)saveToCameraRoll:(id)sender;
+- (IBAction)showExportOptions:(id)sender;
 
 - (void)autoScrollWithText:(NSString *)userText;
+- (void)saveToCameraRoll;
 
 @end
 

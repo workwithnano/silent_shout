@@ -35,6 +35,9 @@ UIColor * fontColor;
 
 NSString * backgroundName;
 
+// Save the export actionsheet in memory
+UIActionSheet * exportSheet = nil;
+
 // Constants
 static const CGFloat SCROLL_FONT_SIZE = 180;
 static const int SCALE_MAX_FONT_SIZE = 360;
@@ -78,7 +81,24 @@ static const int SCALE_MAX_FONT_SIZE = 360;
   
 }
 
-- (IBAction)saveToCameraRoll:(id)sender {
+- (IBAction)showExportOptions:(id)sender {
+  
+  // open a dialog with two custom buttons
+  exportSheet = [[UIActionSheet alloc] initWithTitle:@"Export Shout"
+                                            delegate:self
+                                   cancelButtonTitle:@"Cancel"
+                              destructiveButtonTitle:nil
+                                   otherButtonTitles:@"Save to Camera Roll", @"Send in iMessage", nil];
+  
+  exportSheet.actionSheetStyle = UIActionSheetStyleDefault;
+  
+  [exportSheet showInView:self.view]; // show from our table view (pops up in the middle of the table)
+  [exportSheet release];
+  exportSheet = nil;
+  
+}
+
+- (void)saveToCameraRoll {
   
   UIImageWriteToSavedPhotosAlbum(bgImage.image, nil, nil, nil);
   
@@ -125,6 +145,7 @@ static const int SCALE_MAX_FONT_SIZE = 360;
   bgImage.hidden = YES;
   outputLabel.hidden = YES;
   textView.hidden = YES;
+  
 }
 
 
@@ -235,6 +256,29 @@ static const int SCALE_MAX_FONT_SIZE = 360;
   [[self bgImage] setImage:[UIImage imageNamed:backgroundName]];
   bgImage.hidden = NO;
   
+}
+
+#pragma mark -
+#pragma mark - UIActionSheetDelegate
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+  // the user clicked one of the OK/Cancel buttons
+  if (buttonIndex == 0)
+  {
+    // Save to camera roll
+    [self saveToCameraRoll];
+  }
+  else if (buttonIndex == 1)
+  {
+    // Send w/ iMessage
+    
+  }
+  else
+  {
+    // cancel
+    
+  }
 }
 
 // Override to allow orientations other than the default portrait orientation.
