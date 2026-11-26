@@ -1,8 +1,13 @@
+.DS_Store
 *~
-build
+
+# Build products (make uses -derivedDataPath build)
+build/
+DerivedData/
+*.xcresult
+
+# Per-user Xcode state
+xcuserdata/
+*.xcuserdatad
 *.pbxuser
 *.mode1v3
-.DS_Store
-*.xcuserdatad
-xcuserdatad
-/code/Silent Shout (Utility).xcodeproj/project.xcworkspace/xcuserdata

@@ -233,6 +233,12 @@ Index 2 "swipe" is handled by the shout screen but has no carousel entry; its
 No defaults are registered; the zeros come from `integerForKey:`. Keep these key names and types
 so the meaning of stored values is unchanged.
 
+Rewrite (phase 1, `ShoutSettings`): out-of-range stored indexes are clamped to the nearest
+offered option when read (PLAN ruling 10), so a stored `lettering` 2 ("swipe", the same marquee)
+reads as scroll and a stored `font` 5 reads as Keyboard. This differs from the original's
+fall-through cases (unknown `lettering` meant fit; unknown `font` meant the unbundled
+"DJ Gross"), which no 1.0.1 UI could produce.
+
 ## 5. Fonts
 
 `UIAppFonts` in Info.plist: `Kristi.ttf`, `GraffitiPaintBrush.ttf`, `journal.ttf`, `later_on.ttf`,
@@ -253,10 +259,16 @@ Other constants: `FONT_HIGHLIGHTER` = "GraffitiPaintBrush", ink `#E7FF20`; `FONT
 
 Name tables read from the files: Kristi, Journal, GraffitiPaintBrush and Scriptina have family =
 full = PostScript name equal to the names above. `later_on.ttf` has an empty first name record
-(Spotlight reports the family as "Later On"); the rewrite must confirm the registered name at
-runtime (Open points 1).
+(Spotlight reports the family as "Later On").
 
-The rewrite needs to bundle only `later_on.ttf` and `Kristi.ttf`.
+**Registered names (confirmed at runtime, phase 1; Open points 1 resolved).** On iOS 26,
+`later_on.ttf` registers family **"Later On"** with one font whose PostScript name is
+**`lateron`**; `Kristi.ttf` registers family "Kristi" with PostScript name "Kristi". The rewrite
+passes `lateron` and `Kristi` to `UIFont(name:size:)` (`ShoutFont.fontName`), and
+`BundleResourceTests` asserts both resolve.
+
+The rewrite bundles only `later_on.ttf` and `Kristi.ttf` (in `SilentShout/Fonts/`, listed in
+`UIAppFonts`).
 
 ## 6. Rendering
 
@@ -402,6 +414,17 @@ Used by the running app (each has an `@2x` sibling unless noted):
 | `later_on.ttf` | Pencil font | `assets/Fonts/Pencil/` |
 | `Kristi.ttf` | Dry-Erase font | `assets/Fonts/Dry Erase/` |
 
+**In the rewrite (phase 1).** Every image above is in `SilentShout/Assets.xcassets` under its
+original name without the extension (for example `bkgrd_texture-notecards`, `scale_00000`,
+`btns_help_UP`), with the original 1x and 2x files copied unchanged; the folders inside the
+catalog are for tidiness only and do not namespace the names. The help button uses the
+`assets/Help Overlay/` copies (PLAN ruling 6). `icon-texture_camera` is included for phase 5.
+Two exceptions: the app icon is a single 1024 px `AppIcon` scaled up from `Icon-512.png`
+(no larger art exists), and the launch screen is `UILaunchScreen` in Info.plist showing
+`poster_001` on a `LaunchBackground` colour sampled from the poster. The three preview texture
+@2x files are 639x451 px (319.5x225.5 pt at 2x) and `bkgrnd_main@2x.jpg` is 640x921 against a
+320x461 1x; layouts should size those by their frame, not the image's intrinsic size.
+
 Bundled in 1.0.1 but never displayed (do not import unless the plan says so):
 
 | Asset | Why unused |
@@ -450,8 +473,8 @@ textures. The `PNG Sequence@2x` folders hold 3 files per frame (`name_NNNNN@2x.p
 
 ## Open points
 
-1. **"Later On" font name.** The `name` table in `later_on.ttf` has an empty first record. Confirm
-   at runtime which name iOS registers (expected family "Later On") before hard-coding it.
+1. **"Later On" font name.** Resolved in phase 1: family "Later On", PostScript name `lateron`
+   (section 5).
 2. **Shout orientation after pressing Done in portrait.** The original forced the status bar to
    landscape right and showed the landscape layout while the phone was still upright. On current
    iOS the equivalent is a landscape-only screen that the system rotates; whether to request

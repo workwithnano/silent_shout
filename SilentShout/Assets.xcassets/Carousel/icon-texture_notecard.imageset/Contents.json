@@ -1,0 +1,22 @@
+{
+  "images": [
+    {
+      "filename": "icon-texture_notecard.png",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "filename": "icon-texture_notecard@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
