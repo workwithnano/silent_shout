@@ -19,7 +19,7 @@ SIM_DEST = $(if $(wildcard $(SIM_LANE)),$(shell $(SIM_LANE) dest),$(error $(SIM_
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test test-ui check-sim-lane sim-device sim-clean sim-doctor clean
+.PHONY: help build test test-ui record-marquee check-sim-lane sim-device sim-clean sim-doctor clean
 
 help: ## List available targets
 	@grep -hE '^[a-z][a-z-]*:.*##' $(MAKEFILE_LIST) \
@@ -43,6 +43,14 @@ test-ui: sim-device ## Run the XCUITest UI tests (slower; UI_ONLY=<target/class[
 	$(SIM_LANE) run -- xcodebuild -project $(PROJECT) -scheme $(SCHEME) -only-testing:$(UI_ONLY) \
 	  -destination '$(SIM_DEST)' -derivedDataPath $(DERIVED) \
 	  -parallel-testing-enabled NO test
+
+# Films the scrolling marquee (Kristi on the notecard, a long message, device landscape left)
+# with `simctl io recordVideo` on the pool device, inside the lane's `run`, and samples the
+# app's CPU meanwhile. Writes OUT (upright H.264), OUT's -raw.mov, -frame-N.png and -cpu.txt.
+# Runs only SilentShoutUITests/MarqueeRecordingTests, which the normal suite skips.
+OUT ?= build/recordings/marquee.mp4
+record-marquee: sim-device ## Record the marquee on the simulator (OUT=<file.mp4>)
+	$(SIM_LANE) run -- scripts/record-marquee.sh '$(OUT)' '$(SIM_DEST)'
 
 check-sim-lane:
 	@$(SIM_LANE_CHECK)
