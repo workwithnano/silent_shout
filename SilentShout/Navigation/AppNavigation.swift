@@ -25,6 +25,11 @@ final class AppNavigation {
     /// presentation (or one still dissolving away) cannot become first responder.
     private(set) var isShoutOnScreen = false
 
+    /// True once the shout's presentation (cross-dissolve and rotation) has finished, until it
+    /// starts leaving. UIKit ignores touches while a presentation runs, so the UI tests wait for
+    /// this (through `ShoutStateProbe`) before tapping the shout.
+    private(set) var isShoutPresented = false
+
     /// The physical orientation of the phone, from `UIDevice` notifications (see `RootView`).
     /// The interface stays portrait-locked on Options and Editing, as in the original, so this
     /// is how Editing sees the phone turned on its side. The shout watches it too
@@ -81,6 +86,7 @@ final class AppNavigation {
         leaveRule = nil
         isShoutCovered = false
         if returningToOptions { isReturningToOptions = true }
+        isShoutPresented = false
         isShouting = false
     }
 
@@ -88,9 +94,15 @@ final class AppNavigation {
     /// dismissal has completed.
     func shoutPresentationDidChange(onScreen: Bool) {
         isShoutOnScreen = onScreen
+        if !onScreen { isShoutPresented = false }
         if !onScreen, isReturningToOptions, !isShouting {
             popToOptions()
         }
+    }
+
+    /// Called by `ShoutPresenter` when the presentation's animation has completed.
+    func shoutDidFinishPresenting() {
+        if isShouting { isShoutPresented = true }
     }
 
     /// Stores the phone's orientation and, while the shout is up, leaves it when the phone is
@@ -253,7 +265,8 @@ struct RootView: View {
         .background {
             ShoutPresenter(
                 isPresented: navigation.isShouting,
-                onScreenChange: { navigation.shoutPresentationDidChange(onScreen: $0) }
+                onScreenChange: { navigation.shoutPresentationDidChange(onScreen: $0) },
+                onPresented: { navigation.shoutDidFinishPresenting() }
             ) {
                 ShoutView()
                     .environment(settings)

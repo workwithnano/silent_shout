@@ -428,7 +428,8 @@ Background image view shows the plain texture. Over it, the marquee:
   -200 rather than 0, there is a visible jump at each restart. Both are original behaviour.)
 - Not user-scrollable (interaction disabled); taps pass through to toggle the toolbar.
 
-**In the rewrite (phase 4)** (`MarqueeMotion`, `ShoutRenderer.drawMarquee`, `MarqueeView`):
+**In the rewrite (phases 4 and 7)** (`MarqueeMotion`, `ShoutRenderer.drawMarquee`,
+`MarqueeLine`, `MarqueeLayerPlan`, `MarqueeView`):
 
 - Numbers are reference points scaled with the canvas (`ShoutCanvas.scale`): 180 pt type,
   90 pt/s, 20 pt gap, 200 pt lead-in.
@@ -444,8 +445,34 @@ Background image view shows the plain texture. Over it, the marquee:
   toolbar shows (ruling 4).
 - The whole marquee is drawn at alpha 0.75 as one layer, so overlapping script glyphs do not
   darken each other.
-- On screen a display link redraws the marquee at up to 60 fps. An export image (phase 5) draws
-  it at time 0, the start position (PLAN ruling 8).
+- On screen the marquee is Core Animation layers that the app never redraws (phase 7):
+  - The line is laid out once as one Core Text line at 180 reference points, so spacing,
+    kerning and ligatures are those of one `NSString.draw` of the whole line. Its glyphs are
+    grouped into chunks (a word with its trailing spaces; a word whose bitmap would pass
+    4096 px is cut by glyph range), and each chunk is drawn once into its own alpha-only bitmap
+    (one byte a pixel) covering the glyph outlines' own bounds plus 2 px, so Kristi's tails and
+    loops are never clipped. The bitmaps sit on whole pixels; the fraction of a pixel of the
+    line's start is drawn into them, so the first frame is pixel-for-pixel the renderer's.
+  - The chunk layers are the instances of a `CAReplicatorLayer` (the "strip"), repeated
+    `textWidth + 20` points apart, two instances for any text that scrolls (enough at every
+    phase). The strip masks one ink-coloured layer the size of the screen; the view holding it
+    has alpha 0.75.
+  - Two linear `CABasicAnimation`s on the strip's `position.x` move it: the lead-in, from
+    200 points in to the left edge (200 / 90 s, once, holding its end), then from the left edge
+    to one copy further left (`(textWidth + 20) / 90` s, repeating forever), which looks the
+    same as the left edge, so the repeat is seamless. Both are timed from the same start, and
+    are re-added with that start when the view re-enters a window or the app returns to the
+    foreground (Core Animation drops them in the background), so the marquee continues rather
+    than restarting. A new text or font starts again; a new size rebuilds the layers and keeps
+    the time; a turn between the two landscapes changes nothing.
+  - Text that fits gets one instance, centred, and no animation.
+  - Bitmaps are one byte a pixel: about 4.4 MB for a 50-character Kristi message at 3x on an
+    iPhone 17 Pro, 55 MB for 500 characters. Above 48 MB the view keeps bitmaps only for
+    chunks within a screen width plus 180 points of either edge (for either instance), checked
+    by a timer every half second (the strip moves 45 points in that time); the rest have none.
+- An export image (phase 5) draws the marquee with `ShoutRenderer.drawMarquee` at time 0, the
+  start position (PLAN ruling 8), which is the on-screen first frame (a unit test compares the
+  two through the render server, and later frames too).
 - Reduce Motion is not applied: the moving text is the content of this mode (QUESTIONS.md).
 
 ### 6.4 Texture images

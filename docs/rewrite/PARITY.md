@@ -142,7 +142,7 @@ item in `QUESTIONS.md`; "PLAN defaults" is the table of decisions made by defaul
 | 6.3 Line vertically centred | deliberate change | Ruling 14 |
 | 6.3 Not user-scrollable; taps pass through | same | |
 | 6.3 Keeps moving with Reduce Motion on | deliberate change | Q11 (1.0.1 predates the setting) |
-| 6.3 Smoothness and CPU cost of the marquee | not verifiable in simulator | |
+| 6.3 Smoothness and CPU cost of the marquee | not verifiable in simulator | Phase 7: Core Animation, no per-frame drawing; simulator CPU 68% to 1% (`make record-marquee`) |
 | 6.4 Texture images for shout and preview | same | |
 
 ## 7. Shout screen chrome

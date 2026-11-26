@@ -134,6 +134,37 @@ final class ShoutScreenTests: XCTestCase {
         XCTAssertEqual(shout.text.value as? String, "", "a short message does not scroll")
     }
 
+    /// The marquee really moves on screen (Core Animation moves it in the render server, so
+    /// only the pixels show it): the middle band of the screen changes while the shout is up.
+    @MainActor
+    func testMarqueeMovesOnScreen() {
+        addTeardownBlock { @MainActor in XCUIDevice.shared.orientation = .portrait }
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication.optionsApp(font: 1, texture: 0, lettering: 1)
+        let message = "Happy birthday Sam! We are over here by the cake"
+        let (_, shout) = shoutWithDone(app, message: message)
+        XCTAssertTrue(shout.waitForValue("Scrolling"))
+
+        // The landscape screen's middle band is the middle column of the portrait screenshot.
+        let points = stride(from: 0.04, through: 0.96, by: 0.02).flatMap { y in [0.47, 0.5, 0.53].map { (x: $0, y: y) } }
+        func band() -> [(r: Int, g: Int, b: Int)] {
+            let probe = PixelProbe(app: app)
+            return points.map { probe.color(atNormalized: $0.x, $0.y) }
+        }
+        func changed(_ a: [(r: Int, g: Int, b: Int)], _ b: [(r: Int, g: Int, b: Int)]) -> Int {
+            zip(a, b).filter { abs($0.r - $1.r) + abs($0.g - $1.g) + abs($0.b - $1.b) > 90 }.count
+        }
+        let first = band()
+        let moved = NSPredicate { _, _ in MainActor.assumeIsolated { changed(first, band()) >= 6 } }
+        let expectation = XCTNSPredicateExpectation(predicate: moved, object: nil)
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: 10), .completed, "the text moves across the screen")
+        // And keeps moving (past the lead-in, into the repeating part).
+        let second = band()
+        let movedAgain = NSPredicate { _, _ in MainActor.assumeIsolated { changed(second, band()) >= 6 } }
+        let again = XCTNSPredicateExpectation(predicate: movedAgain, object: nil)
+        XCTAssertEqual(XCTWaiter().wait(for: [again], timeout: 10), .completed, "the text is still moving")
+    }
+
     /// Pictures of the shout for docs/rewrite/screenshots/ (kept in the result bundle): fit with
     /// a short and a long message, scroll, and the toolbar, over different textures and fonts
     /// and both landscape directions.

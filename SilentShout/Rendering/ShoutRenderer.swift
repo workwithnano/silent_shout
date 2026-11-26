@@ -41,8 +41,8 @@ struct ShoutScene: Equatable {
 /// Everything here draws into the current UIKit graphics context, so it runs on the main actor.
 @MainActor
 enum ShoutRenderer {
-    /// What to include. The screen draws the marquee itself (it moves), so in scroll mode it
-    /// asks for the background only.
+    /// What to include. The screen shows the marquee with its own layers (`MarqueeView`), so in
+    /// scroll mode it asks for the background only.
     enum Content: Equatable, Sendable {
         case full
         case backgroundOnly
@@ -153,9 +153,10 @@ enum ShoutRenderer {
         return MarqueeMotion(textWidth: width, viewWidth: canvas.marqueeWidth)
     }
 
-    /// Draws the marquee at `time` seconds. `appliesAlpha` composites it at 0.75 as one layer;
-    /// the on-screen view passes false and sets its own layer's opacity instead, which is
-    /// the same picture without an offscreen pass every frame.
+    /// Draws the marquee at `time` seconds, for an export (time 0) and the tests. `appliesAlpha`
+    /// composites it at 0.75 as one layer; false draws opaque ink for a caller that applies the
+    /// alpha itself. The on-screen `MarqueeView` draws nothing per frame: it lays out the same
+    /// line (`MarqueeLine`) into layers whose first frame is this picture at time 0.
     static func drawMarquee(
         _ text: String,
         font: ShoutFont,

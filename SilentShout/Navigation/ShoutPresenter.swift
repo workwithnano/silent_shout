@@ -12,6 +12,8 @@ struct ShoutPresenter<Content: View>: UIViewControllerRepresentable {
     let isPresented: Bool
     /// True as the shout is presented, false once its dismissal has completed.
     let onScreenChange: (Bool) -> Void
+    /// Called when the presentation's animation has completed.
+    let onPresented: () -> Void
     @ViewBuilder let content: () -> Content
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -32,6 +34,7 @@ struct ShoutPresenter<Content: View>: UIViewControllerRepresentable {
                 let shout = ShoutHostingController(rootView: AnyView(content()), orientation: orientation)
                 coordinator.shout = shout
                 let onScreenChange = onScreenChange
+                let onPresented = onPresented
                 // Present after this SwiftUI update pass, from the topmost controller.
                 Task { @MainActor [weak anchor] in
                     guard let anchor, coordinator.shout === shout else { return }
@@ -43,7 +46,7 @@ struct ShoutPresenter<Content: View>: UIViewControllerRepresentable {
                     // turn as the presentation, so the presentation does the rotating and
                     // Editing does not turn first.
                     OrientationLock.setQuietly(.landscape)
-                    top.present(shout, animated: true)
+                    top.present(shout, animated: true) { onPresented() }
                 }
             }
         } else if let shout = coordinator.shout {

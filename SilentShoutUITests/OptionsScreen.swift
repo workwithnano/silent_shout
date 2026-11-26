@@ -7,6 +7,8 @@ extension XCUIApplication {
     static func optionsApp(reset: Bool) -> XCUIApplication {
         let app = XCUIApplication()
         if reset { app.launchArguments.append("-UITestResetSettings") }
+        // The shout's state probe (DEBUG, invisible): `ShoutScreen.showToolbar` waits on it.
+        app.launchArguments.append("-UITestShoutState")
         return app
     }
 

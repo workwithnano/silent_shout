@@ -105,7 +105,11 @@ struct ShoutView: View {
 
             #if DEBUG
             if UITestHooks.showsShoutState {
-                ShoutStateProbe(orientation: navigation.deviceOrientation, isShouting: navigation.isShouting)
+                ShoutStateProbe(
+                    orientation: navigation.deviceOrientation,
+                    isShouting: navigation.isShouting,
+                    isPresented: navigation.isShoutPresented
+                )
             }
             #endif
         }
@@ -270,7 +274,7 @@ private struct ShoutCanvasView: View {
                 .frame(width: size.width, height: size.height)
                 .accessibilityHidden(true)
                 if scene.sizing == .scroll {
-                    ShoutMarquee(text: scene.text, font: scene.font, size: size)
+                    ShoutMarquee(text: scene.text, font: scene.font, size: size, displayScale: displayScale)
                         .frame(width: size.width, height: size.height)
                 }
             }
@@ -346,112 +350,19 @@ struct ShoutToolbar: View {
     }
 }
 
-/// The scrolling marquee on screen. It draws with `ShoutRenderer.drawMarquee`, the same code
-/// an export uses, once per display frame while the text is wider than the screen.
+/// The scrolling marquee on screen (`MarqueeView`, on Core Animation). An export draws the
+/// same marquee at its start position with `ShoutRenderer.drawMarquee`.
 private struct ShoutMarquee: UIViewRepresentable {
     let text: String
     let font: ShoutFont
     let size: CGSize
+    let displayScale: CGFloat
 
     func makeUIView(context: Context) -> MarqueeView {
         MarqueeView()
     }
 
     func updateUIView(_ view: MarqueeView, context: Context) {
-        view.configure(text: text, font: font, size: size)
-    }
-}
-
-/// Redraws itself every frame from a display link while its text scrolls. The time starts when
-/// the view first has text and a window; changing the text or font starts it again.
-final class MarqueeView: UIView {
-    private var text = ""
-    private var font: ShoutFont = .pencil
-    private var canvas = ShoutCanvas(size: .zero)
-    private var startTime: CFTimeInterval?
-    private var displayLink: CADisplayLink?
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        isOpaque = false
-        backgroundColor = .clear
-        contentMode = .redraw
-        isUserInteractionEnabled = false
-        isAccessibilityElement = false
-        // The whole marquee at 0.75 (SPEC 6.3); the drawing itself is opaque ink.
-        alpha = ShoutCanvas.marqueeAlpha
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) is not used")
-    }
-
-    func configure(text: String, font: ShoutFont, size: CGSize) {
-        let textChanged = text != self.text || font != self.font
-        let sizeChanged = size != canvas.size
-        guard textChanged || sizeChanged else { return }
-        self.text = text
-        self.font = font
-        canvas = ShoutCanvas(size: size)
-        if textChanged { startTime = nil }
-        updateDisplayLink()
-        setNeedsDisplay()
-    }
-
-    /// Seconds since the marquee started, 0 before it has.
-    var elapsed: TimeInterval {
-        guard let startTime else { return 0 }
-        return CACurrentMediaTime() - startTime
-    }
-
-    var scrolls: Bool {
-        ShoutRenderer.marqueeMotion(for: text, font: font, canvas: canvas).scrolls
-    }
-
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        updateDisplayLink()
-    }
-
-    override func draw(_ rect: CGRect) {
-        guard let context = UIGraphicsGetCurrentContext() else { return }
-        ShoutRenderer.drawMarquee(text, font: font, canvas: canvas, time: elapsed, appliesAlpha: false, context: context)
-    }
-
-    private func updateDisplayLink() {
-        let shouldRun = window != nil && scrolls
-        if shouldRun {
-            if startTime == nil { startTime = CACurrentMediaTime() }
-            guard displayLink == nil else { return }
-            let link = CADisplayLink(target: DisplayLinkTarget(view: self), selector: #selector(DisplayLinkTarget.step))
-            // 60 frames a second is smooth for 90 pt/s and halves the drawing on ProMotion screens.
-            link.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: 60, preferred: 60)
-            link.add(to: .main, forMode: .common)
-            displayLink = link
-        } else {
-            displayLink?.invalidate()
-            displayLink = nil
-        }
-    }
-
-    /// The whole view: script glyphs (Kristi's tails and loops) reach well outside the line's
-    /// box, and redrawing only that band left stale pieces of them behind.
-    fileprivate func step() {
-        setNeedsDisplay()
-    }
-}
-
-/// Holds the marquee weakly, so the display link (which retains its target) does not keep it.
-@MainActor
-private final class DisplayLinkTarget: NSObject {
-    weak var view: MarqueeView?
-
-    init(view: MarqueeView) {
-        self.view = view
-    }
-
-    @objc func step() {
-        view?.step()
+        view.configure(text: text, font: font, size: size, displayScale: displayScale)
     }
 }

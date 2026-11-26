@@ -73,8 +73,23 @@ struct ShoutScreen {
             && wait(for: predicate, on: doubleBack, timeout: timeout)
     }
 
+    /// The app's report that the shout's presentation has finished ("presented"); touches are
+    /// ignored by UIKit until then. Present only with `-UITestShoutState` (every
+    /// `optionsApp` launch adds it).
+    var presentation: XCUIElement {
+        app.descendants(matching: .any).matching(identifier: "debug.shoutPresented").firstMatch
+    }
+
+    /// Waits until the shout's presentation animation has finished, so a tap reaches it.
+    @discardableResult
+    func waitUntilPresented(timeout: TimeInterval = 10) -> Bool {
+        wait(for: NSPredicate(format: "value == %@", "presented"), on: presentation, timeout: timeout)
+    }
+
     /// Taps the middle of the shout (away from the toolbar) and waits for the toolbar to show.
+    /// Waits for the presentation to finish first: a tap during it is dropped.
     func showToolbar(file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(waitUntilPresented(), "the shout finished presenting", file: file, line: line)
         text.tap()
         XCTAssertTrue(waitForToolbar(visible: true), "a tap shows the toolbar", file: file, line: line)
     }

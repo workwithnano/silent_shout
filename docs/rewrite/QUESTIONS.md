@@ -47,7 +47,7 @@ Gathered from every phase's notes. None of these can be seen in the simulator.
 - Taking a photo with the camera.
 - The Photos add-only permission prompt and an actual save to the library (UI tests use a fake saver).
 - The system photo picker (UI tests use a drawn fixture photo).
-- Marquee smoothness and CPU cost (it is redrawn on the CPU every frame, at up to 60 fps).
+- Marquee smoothness on a phone. Since phase 7 it is Core Animation layers moved by the render server, with no drawing in the app per frame (about 1% app CPU in the simulator, down from about 68%), but how smooth it looks on a ProMotion screen has not been seen.
 - The exit transition frame by frame: rotation to portrait, then the dissolve (Q13).
 - The screen staying awake while the shout shows (Q9).
 - The home indicator hiding on the shout.

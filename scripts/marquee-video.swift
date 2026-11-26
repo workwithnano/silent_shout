@@ -4,6 +4,8 @@
 //   marquee-video rotate <in.mov> <out.mp4>         upright H.264 copy at half size
 //   marquee-video frames <in.mov> <prefix> <s>...   upright full-size PNGs at those seconds
 //   marquee-video compare <a.png> <b.png> <out.png> one above the other, a gap between
+//   marquee-video match <ref.png> <in.mov> <out.png> <from s> <to s>
+//                                                  the frame in that stretch most like ref
 //   marquee-video info <file>                      duration, pixel size, codec, bytes
 //
 // The simulator records the phone's portrait framebuffer. The shout is filmed in device
@@ -134,6 +136,45 @@ func frames(_ input: String, _ prefix: String, _ seconds: [Double]) async throws
     }
 }
 
+/// Grey levels of an image scaled to `width` pixels wide, for comparing frames.
+func thumbnail(_ image: CGImage, width: Int) -> [UInt8] {
+    let height = max(1, image.height * width / image.width)
+    var bytes = [UInt8](repeating: 0, count: width * height)
+    bytes.withUnsafeMutableBytes { buffer in
+        let context = CGContext(
+            data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width,
+            space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue
+        )
+        context?.interpolationQuality = .medium
+        context?.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+    }
+    return bytes
+}
+
+/// Finds the frame between two times whose upright picture is closest to `reference` (the
+/// marquee at the same place), and writes it full size.
+func match(_ reference: String, _ input: String, _ output: String, from: Double, to: Double) async throws {
+    let target = thumbnail(loadImage(reference), width: 240)
+    let asset = AVURLAsset(url: URL(fileURLWithPath: input))
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.requestedTimeToleranceBefore = .zero
+    generator.requestedTimeToleranceAfter = .zero
+    var best: (score: Int, time: CMTime)?
+    var time = from
+    while time <= to {
+        let (image, actual) = try await generator.image(at: CMTime(seconds: time, preferredTimescale: 600))
+        let candidate = thumbnail(uprightImage(image), width: 240)
+        let score = zip(candidate, target).reduce(0) { $0 + abs(Int($1.0) - Int($1.1)) }
+        if best == nil || score < best!.score { best = (score, actual) }
+        time += 1.0 / 60
+    }
+    guard let best else { fail("no frames") }
+    let (image, _) = try await generator.image(at: best.time)
+    writePNG(uprightImage(image), to: URL(fileURLWithPath: output))
+    print(String(format: "%@: frame at %.3f s, mean grey difference %.2f", (output as NSString).lastPathComponent,
+                 best.time.seconds, Double(best.score) / Double(target.count)))
+}
+
 func compare(_ a: String, _ b: String, _ output: String) {
     let top = loadImage(a), bottom = loadImage(b)
     let gap = 24
@@ -176,6 +217,9 @@ case "frames" where arguments.count >= 5:
     try await frames(arguments[2], arguments[3], arguments[4...].compactMap(Double.init))
 case "compare" where arguments.count == 5:
     compare(arguments[2], arguments[3], arguments[4])
+case "match" where arguments.count == 7:
+    guard let from = Double(arguments[5]), let to = Double(arguments[6]) else { fail("match: times") }
+    try await match(arguments[2], arguments[3], arguments[4], from: from, to: to)
 case "info":
     try await info(arguments[2])
 default:

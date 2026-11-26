@@ -81,20 +81,35 @@ enum PhotoFixture {
 /// "portrait leaving". Nothing changes on screen when the phone turns upright under the export
 /// sheet (the interface stays landscape), so this is how a test knows the turn has been
 /// handled before it checks that the shout stayed.
+///
+/// A second element, `debug.shoutPresented`, reads "presented" once the shout's presentation
+/// animation has finished ("presenting" before): touches are ignored until then, so tests wait
+/// for it before tapping the shout.
 struct ShoutStateProbe: View {
     static let identifier = "debug.shoutState"
 
+    static let presentedIdentifier = "debug.shoutPresented"
+
     let orientation: UIDeviceOrientation
     let isShouting: Bool
+    let isPresented: Bool
 
     var body: some View {
-        Color.clear
-            .frame(width: 1, height: 1)
-            .allowsHitTesting(false)
-            .accessibilityElement()
-            .accessibilityLabel("Shout state")
-            .accessibilityIdentifier(Self.identifier)
-            .accessibilityValue("\(Self.name(of: orientation)) \(isShouting ? "shouting" : "leaving")")
+        HStack(spacing: 0) {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityLabel("Shout state")
+                .accessibilityIdentifier(Self.identifier)
+                .accessibilityValue("\(Self.name(of: orientation)) \(isShouting ? "shouting" : "leaving")")
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityLabel("Shout presentation")
+                .accessibilityIdentifier(Self.presentedIdentifier)
+                .accessibilityValue(isPresented ? "presented" : "presenting")
+        }
+        .allowsHitTesting(false)
     }
 
     static func name(of orientation: UIDeviceOrientation) -> String {
