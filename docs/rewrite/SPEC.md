@@ -72,6 +72,23 @@ On leaving, the status bar is shown again, black opaque, portrait.
 
 Portrait-upside-down, face up and face down do nothing on any screen.
 
+The original's `didRotate:` on the shout left on **any** portrait notification. After the Done key
+the phone is usually already upright, so that only worked because no notification arrives until
+the phone moves.
+
+**In the rewrite (phase 4): the exact leave rule** (`ShoutLeaveRule`, fed by
+`AppNavigation.deviceOrientationDidChange`). The shout leaves on a device-orientation change to
+portrait only after the phone has been seen in landscape (left or right) since this shout
+started: either it was landscape when the shout started (the rotation trigger), or it has turned
+to landscape since (the Done-key case, phone upright at the start). Face up, face down, upside
+down and unknown neither leave nor reset that memory, and each shout starts the rule afresh. The
+toolbar's back and double-back buttons leave at any time.
+
+Every exit (back, double-back, rotating to portrait) sets the app back to portrait, waits for
+that rotation to finish, then dissolves the shout away; double-back pops Editing once the dissolve
+has finished, as the original popped in the dismissal's completion. Editing does not take the
+keyboard back while the shout is on screen or while double-back is on its way to Options.
+
 ## 2. Screens in detail
 
 ### 2.1 Options (`MainView.xib`, content area 320x460 below the status bar)
@@ -204,6 +221,18 @@ On load: status bar hidden; toolbar alpha 0; read `font`, `texture`, `lettering`
 | 2 | Same marquee with user interaction enabled ("swipe"). Not reachable: the carousel offers only 0 and 1. |
 
 A web view outlet (`outputWebView`) is declared and never used.
+
+**In the rewrite (phase 4).** `Views/ShoutView.swift` in a `ShoutHostingController`
+(`Navigation/ShoutPresenter.swift`): landscape only (PLAN ruling 2), status bar hidden, home
+indicator auto-hidden, screen kept awake while it shows (`isIdleTimerDisabled`, restored on exit;
+the original did not do this, QUESTIONS.md). Started by rotating, it is presented upright for the
+landscape the phone is in (device landscape left is interface landscape right and the other way
+round) and the system follows the phone between the two landscapes (ruling 3); started by the
+Done key with the phone upright, it is presented in interface landscape right, as the original
+forced the status bar. The window's orientation mask and the shout's own supported orientations
+are the same value (`OrientationLock.mask`), so they never disagree. Drawing is
+`Rendering/ShoutRenderer.swift` (sections 6.2 and 6.3); geometry and marquee motion are
+`Layout/ShoutLayout.swift`. The view's 25% grey is drawn under the background.
 
 ## 3. The option carousels
 
@@ -347,6 +376,16 @@ original), scaled with the preview card (PLAN ruling 5).
 - The original made these bitmaps at 1x scale. The rewrite should render at the device scale; the
   geometry above is in points.
 - This composited image is what "Save to Camera Roll" saves (section 9).
+- The label's alpha (0.894) is taken to be part of its bitmap (`renderInContext:` applying the
+  layer's opacity), so black ink multiplies to about 11% of the texture rather than to black.
+  This reading is not verified against a running 2011 build; the difference is slight.
+
+**In the rewrite (phase 4).** `ShoutRenderer` draws the background aspect-filling the whole
+screen, then the text with `TextFitter.shout`'s size in a real `UILabel` of 453x302 (so its line
+breaks, vertical centring and clipping are UILabel's), scaled by 480/453 onto the 480x320
+canvas, the canvas scaled uniformly to fit the screen and centred (PLAN ruling 5), composited
+with multiply at alpha 0.894. The screen shows that image, rendered at the device scale for the
+current screen size.
 
 ### 6.3 Shout scroll (`lettering` 1)
 
@@ -366,6 +405,26 @@ Background image view shows the plain texture. Over it, the marquee:
   `textWidth / 90` s, the real speed is slightly above 90 pt/s; and because the loop restarts at
   -200 rather than 0, there is a visible jump at each restart. Both are original behaviour.)
 - Not user-scrollable (interaction disabled); taps pass through to toggle the toolbar.
+
+**In the rewrite (phase 4)** (`MarqueeMotion`, `ShoutRenderer.drawMarquee`, `MarqueeView`):
+
+- Numbers are reference points scaled with the canvas (`ShoutCanvas.scale`): 180 pt type,
+  90 pt/s, 20 pt gap, 200 pt lead-in.
+- The marquee spans the full screen width, as AutoScrollLabel spanned the full 480 pt screen,
+  so its width in reference points is the screen width divided by the scale (about 696 on an
+  iPhone 17 Pro). Text no wider than that does not move: one copy, centred, as AutoScrollLabel
+  did (it scrolled only when the line was strictly wider than itself).
+- Wider text starts with the first copy's leading edge 200 pt in from the left, as the
+  original's first loop, and moves left at exactly 90 pt/s. Copies follow with a 20 pt gap, so
+  after the lead-in the picture repeats every `textWidth + 20` points with no jump (PLAN ruling
+  13).
+- The line is vertically centred on the screen (ruling 14); the marquee does not move when the
+  toolbar shows (ruling 4).
+- The whole marquee is drawn at alpha 0.75 as one layer, so overlapping script glyphs do not
+  darken each other.
+- On screen a display link redraws the marquee at up to 60 fps. An export image (phase 5) draws
+  it at time 0, the start position (PLAN ruling 8).
+- Reduce Motion is not applied: the moving text is the content of this mode (QUESTIONS.md).
 
 ### 6.4 Texture images
 
@@ -393,6 +452,23 @@ Background image view shows the plain texture. Over it, the marquee:
 
 The 1.0.1 art for these three is 38x38 shown in 33x33 buttons (centred, unscaled).
 Buttons are only tappable while the toolbar is visible in practice (alpha 0 views get no touches).
+
+The XIB sets the toolbar's alpha to 0.627, but the code fades it between 0 and 1.0, so it shows
+fully opaque.
+
+**In the rewrite (phase 4).** A tap anywhere toggles the toolbar over 0.4 s (ease in-out); a tap
+on the bar between its buttons toggles it too (UIToolbar passed such touches up the responder
+chain). While hidden it is out of the view tree, so it takes no touches and VoiceOver does not
+find it. It is 44 pt tall at the top of the screen (ruling 4; landscape has no top inset), its
+background is `toolbar_shoutoverlay` (480x44, the black gradient 1.0.1 bundled but never used,
+standing in for the 2011 black `UIToolbar`; QUESTIONS.md) stretched across the full width, and
+its buttons sit inside the safe area so none is under the Dynamic Island or sensor housing:
+double back then back at the leading end, 38 pt art centred in 44 pt targets (ruling 7), 6 pt
+from the safe-area edge. A 44 pt slot at the trailing end is kept empty for phase 5's export
+button. The status bar stays hidden when the toolbar shows (in landscape on current iPhones
+there is none to show). VoiceOver reads the message as one element (label: the message; value:
+"Scrolling" while the marquee moves), whose double-tap toggles the toolbar; the buttons read
+"Back 2 Steps" and "Back 1 Step" with hints.
 
 ## 8. Help overlay (Options screen)
 
@@ -466,6 +542,7 @@ Used by the running app (each has an `@2x` sibling unless noted):
 | `btns_share_UP`, `_DOWN` | Shout share | `assets/Buttons/` |
 | `help_bubble-writingtool`, `-background`, `-presentation` | Help overlay | `assets/Help Overlay/` |
 | `toolbar_Textfield.png` | Text bar background | `assets/Toolbars/` |
+| `toolbar_shoutoverlay.png` | Shout toolbar background (rewrite only, phase 4; unused in 1.0.1) | `assets/Toolbars/` |
 | `textfield.png` | Text field background | `assets/Toolbars/` |
 | `later_on.ttf` | Pencil font | `assets/Fonts/Pencil/` |
 | `Kristi.ttf` | Dry-Erase font | `assets/Fonts/Dry Erase/` |
@@ -500,7 +577,8 @@ Bundled in 1.0.1 but never displayed (do not import unless the plan says so):
 Unused archives in `assets/` (not in the project at all): `Buttons/_archive/`,
 `Icons/Fonts/_archive/`, `Icons/Textures/_archive/`, `Fonts/_archive/`,
 `Fonts/Paint Brush/`, `Fonts/Ink and Quill/Scriptina/scriptina_alt.ttf`, `Fonts/Dry Erase/Kristi.zip`,
-`Beta Applications Icons/`, `Buttons/btns_brightness_*`, `Toolbars/toolbar_shoutoverlay*`,
+`Beta Applications Icons/`, `Buttons/btns_brightness_*`, `Toolbars/toolbar_shoutoverlay*` (used
+by the rewrite's shout toolbar since phase 4),
 `Help Overlay/help-overlay-reference.jpg`, `Sound Effects/swish.mp3`, the `.mov`/source files
 beside each PNG sequence, the `.svn` folders, and the cardboard `.png` duplicates of the `.jpg`
 textures. The `PNG Sequence@2x` folders hold 3 files per frame (`name_NNNNN@2x.png` plus misnamed

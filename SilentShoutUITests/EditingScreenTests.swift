@@ -42,7 +42,7 @@ final class EditingScreenTests: XCTestCase {
         XCTAssertTrue(next.waitForExistence(timeout: 5))
         XCTAssertTrue(editing.waitUntilGone(editing.textField))
         XCTAssertTrue(next.isHittable)
-        XCTAssertFalse(editing.shoutStub.exists, "the toggle never starts the shout")
+        XCTAssertFalse(ShoutScreen(app: app).text.exists, "the toggle never starts the shout")
 
         next.tap()
         XCTAssertTrue(editing.waitForField("Back soon"))
@@ -84,8 +84,8 @@ final class EditingScreenTests: XCTestCase {
         XCTAssertTrue(editing.waitForField("Lunch at noon today"))
     }
 
-    /// Done starts the shout (the stub in phase 3) with the saved text; back returns to
-    /// Editing with the keyboard up and the text intact.
+    /// Done starts the shout with the saved text; back returns to Editing with the keyboard up
+    /// and the text intact.
     @MainActor
     func testDoneStartsShoutAndBackRestoresKeyboard() {
         let app = XCUIApplication.optionsApp(reset: true)
@@ -98,12 +98,13 @@ final class EditingScreenTests: XCTestCase {
         XCTAssertTrue(editing.waitForPreview("Go team"))
         editing.textField.typeText("\n") // the Done key
 
-        XCTAssertTrue(editing.shoutStub.waitForExistence(timeout: 5))
-        XCTAssertEqual(editing.shoutText.label, "Go team", "the text was saved before the shout")
+        let shout = ShoutScreen(app: app)
+        XCTAssertTrue(shout.waitForShout("Go team"), "the text was saved before the shout")
         XCTAssertFalse(editing.textField.isHittable)
 
-        editing.shoutBack.tap()
-        XCTAssertTrue(editing.waitUntilGone(editing.shoutStub))
+        shout.showToolbar()
+        shout.press(shout.back)
+        XCTAssertTrue(shout.waitUntilGone())
         XCTAssertTrue(editing.waitForFocus(), "keyboard back up after the shout")
         XCTAssertTrue(editing.waitForField("Go team"))
         XCTAssertTrue(editing.waitForPreview("Go team"))
@@ -130,20 +131,23 @@ final class EditingScreenTests: XCTestCase {
         XCTAssertTrue(editing.waitForPreview("Turn me"))
         XCUIDevice.shared.orientation = .landscapeLeft
 
-        XCTAssertTrue(editing.shoutStub.waitForExistence(timeout: 5))
-        XCTAssertEqual(editing.shoutText.label, "Turn me")
+        let shout = ShoutScreen(app: app)
+        XCTAssertTrue(shout.waitForShout("Turn me"))
 
         // The other landscape while the shout is up does not start a second one.
         XCUIDevice.shared.orientation = .landscapeRight
-        XCTAssertTrue(editing.shoutStub.exists)
+        XCTAssertTrue(shout.text.exists)
 
-        editing.shoutBack.tap()
-        XCTAssertTrue(editing.waitUntilGone(editing.shoutStub))
+        // Back with the phone still on its side: Editing, upright in portrait.
+        shout.showToolbar()
+        shout.press(shout.back)
+        XCTAssertTrue(shout.waitUntilGone())
         XCTAssertTrue(editing.waitForFocus())
         XCTAssertTrue(editing.waitForField("Turn me"))
 
         XCUIDevice.shared.orientation = .portrait
-        XCTAssertFalse(editing.shoutStub.exists, "turning upright on Editing does nothing")
+        XCTAssertTrue(editing.waitForFocus())
+        XCTAssertFalse(shout.text.exists, "turning upright on Editing does nothing")
     }
 
     /// Screenshots of the Editing screen with a short and a long message, kept in the result

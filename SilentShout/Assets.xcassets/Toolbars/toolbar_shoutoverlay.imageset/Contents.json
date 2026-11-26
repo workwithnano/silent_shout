@@ -1,0 +1,22 @@
+{
+  "images": [
+    {
+      "filename": "toolbar_shoutoverlay.png",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "filename": "toolbar_shoutoverlay@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

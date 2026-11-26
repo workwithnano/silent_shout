@@ -179,4 +179,7 @@ enum ChromeImage: String, CaseIterable, Sendable {
     case helpBubblePresentation = "help_bubble-presentation"
     case textBar = "toolbar_Textfield"
     case textField = "textfield"
+    /// The shout's toolbar background (480x44): a black gradient matching the original's
+    /// black-style `UIToolbar`. 1.0.1 bundled it but drew the system bar instead (SPEC.md 7).
+    case shoutToolbar = "toolbar_shoutoverlay"
 }

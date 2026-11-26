@@ -26,7 +26,7 @@ struct EditingView: View {
                 TextBar(
                     layout: layout,
                     text: $draft,
-                    wantsFocus: !navigation.isShouting && !navigation.isShoutOnScreen && !isLeaving,
+                    wantsFocus: !navigation.isShouting && !navigation.isShoutOnScreen && !navigation.isReturningToOptions && !isLeaving,
                     onBack: backToOptions,
                     onDone: startShout
                 )

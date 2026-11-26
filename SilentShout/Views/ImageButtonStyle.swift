@@ -8,6 +8,9 @@ struct ImageButtonStyle: ButtonStyle {
     let down: ChromeImage
     var selected: ChromeImage? = nil
     var isSelected = false
+    /// When set, the tappable area is at least this many points square, with the art centred
+    /// in it (PLAN ruling 7: 44 pt targets around smaller art).
+    var minimumTapSize: CGFloat? = nil
 
     func makeBody(configuration: Configuration) -> some View {
         let image: ChromeImage = if configuration.isPressed {
@@ -18,6 +21,7 @@ struct ImageButtonStyle: ButtonStyle {
             up
         }
         Image(image.rawValue)
+            .frame(minWidth: minimumTapSize, minHeight: minimumTapSize)
             .contentShape(Rectangle())
     }
 }

@@ -9,6 +9,15 @@ extension XCUIApplication {
         if reset { app.launchArguments.append("-UITestResetSettings") }
         return app
     }
+
+    /// A fresh app with options chosen through the launch arguments (the argument domain
+    /// overrides the stored values for this launch only), so tests reach a texture, font or
+    /// sizing without swiping the carousels. Indexes as stored: `font`, `texture`, `lettering`.
+    static func optionsApp(font: Int = 0, texture: Int = 0, lettering: Int = 0) -> XCUIApplication {
+        let app = optionsApp(reset: true)
+        app.launchArguments += ["-font", String(font), "-texture", String(texture), "-lettering", String(lettering)]
+        return app
+    }
 }
 
 /// Queries for the Options screen. Identifiers match `OptionsAccessibilityID` in the app.

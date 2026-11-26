@@ -1,7 +1,6 @@
 import XCTest
 
-/// Queries for the Editing screen and the shout stub. Identifiers match
-/// `EditingAccessibilityID` and `ShoutView` in the app.
+/// Queries for the Editing screen. Identifiers match `EditingAccessibilityID` in the app.
 @MainActor
 struct EditingScreen {
     let app: XCUIApplication
@@ -13,10 +12,6 @@ struct EditingScreen {
         app.descendants(matching: .any).matching(identifier: "editing.preview").firstMatch
     }
     var clearButton: XCUIElement { textField.buttons.firstMatch }
-
-    var shoutStub: XCUIElement { app.staticTexts["shout.stub"] }
-    var shoutText: XCUIElement { app.staticTexts["shout.text"] }
-    var shoutBack: XCUIElement { app.buttons["shout.back"] }
 
     /// From a freshly launched app on Options: Next, then wait until the field has the keyboard.
     func open(file: StaticString = #filePath, line: UInt = #line) {

@@ -37,8 +37,10 @@ test: sim-device ## Run the Swift Testing unit tests
 	  -destination '$(SIM_DEST)' -derivedDataPath $(DERIVED) test
 
 # Parallel testing stays off: it clones simulators, which the shared pool exists to avoid.
-test-ui: sim-device ## Run the XCUITest UI tests (slower)
-	$(SIM_LANE) run -- xcodebuild -project $(PROJECT) -scheme $(SCHEME) -only-testing:SilentShoutUITests \
+# UI_ONLY narrows the run, e.g. `make test-ui UI_ONLY=SilentShoutUITests/ShoutScreenTests`.
+UI_ONLY ?= SilentShoutUITests
+test-ui: sim-device ## Run the XCUITest UI tests (slower; UI_ONLY=<target/class[/method]> narrows)
+	$(SIM_LANE) run -- xcodebuild -project $(PROJECT) -scheme $(SCHEME) -only-testing:$(UI_ONLY) \
 	  -destination '$(SIM_DEST)' -derivedDataPath $(DERIVED) \
 	  -parallel-testing-enabled NO test
 

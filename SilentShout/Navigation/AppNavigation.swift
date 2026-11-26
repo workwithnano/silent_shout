@@ -31,9 +31,17 @@ final class AppNavigation {
     /// (turning back to portrait leaves the shout).
     private(set) var deviceOrientation: UIDeviceOrientation = .unknown
 
+    /// Set by double-back: the shout is dismissing and Options comes next, so Editing must not
+    /// take the keyboard back in between. Cleared the next time Editing is shown.
+    private(set) var isReturningToOptions = false
+
+    /// Decides when turning the phone upright leaves the shout (see `ShoutLeaveRule`).
+    private var leaveRule: ShoutLeaveRule?
+
     var isShowingEditing: Bool { path.last == .editing }
 
     func showEditing() {
+        isReturningToOptions = false
         path.append(.editing)
     }
 
@@ -53,13 +61,19 @@ final class AppNavigation {
     @discardableResult
     func startShout() -> Bool {
         guard !isShouting, !isShoutOnScreen, isShowingEditing else { return false }
+        leaveRule = ShoutLeaveRule(startOrientation: deviceOrientation)
         isShouting = true
         return true
     }
 
-    /// Dismisses the shout with a cross-dissolve, back to Editing, which puts its saved text
-    /// back in the field and the keyboard back up.
-    func endShout() {
+    /// Dismisses the shout with a cross-dissolve. Back (one step) returns to Editing, which puts
+    /// its saved text back in the field and the keyboard back up. Double-back
+    /// (`returningToOptions`) pops Editing once the dismissal has finished, landing on Options,
+    /// as the original popped in the dismissal's completion.
+    func endShout(returningToOptions: Bool = false) {
+        guard isShouting else { return }
+        leaveRule = nil
+        if returningToOptions { isReturningToOptions = true }
         isShouting = false
     }
 
@@ -67,10 +81,18 @@ final class AppNavigation {
     /// dismissal has completed.
     func shoutPresentationDidChange(onScreen: Bool) {
         isShoutOnScreen = onScreen
+        if !onScreen, isReturningToOptions, !isShouting {
+            popToOptions()
+        }
     }
 
+    /// Stores the phone's orientation and, while the shout is up, leaves it when the phone is
+    /// turned upright (the original's `didRotate:` on the shout, with `ShoutLeaveRule`).
     func deviceOrientationDidChange(_ orientation: UIDeviceOrientation) {
         deviceOrientation = orientation
+        if isShouting, leaveRule?.shouldLeave(after: orientation) == true {
+            endShout()
+        }
     }
 }
 
@@ -82,21 +104,74 @@ enum ShoutOrientationRule {
         orientation == .landscapeLeft || orientation == .landscapeRight
     }
 
-    /// Turning it back upright on the shout returns to Editing (phase 4 acts on this).
+    /// Turning it back upright on the shout returns to Editing, subject to `ShoutLeaveRule`.
     static func leavesShout(_ orientation: UIDeviceOrientation) -> Bool {
         orientation == .portrait
     }
+
+    /// The interface orientation the shout is presented in: upright for the landscape the
+    /// phone is held in (device landscape left is interface landscape right, and the other way
+    /// round), or landscape right when the phone is upright (the Done key), as the original
+    /// forced the status bar to `UIInterfaceOrientationLandscapeRight`.
+    static func presentationOrientation(for device: UIDeviceOrientation) -> UIInterfaceOrientation {
+        switch device {
+        case .landscapeLeft: .landscapeRight
+        case .landscapeRight: .landscapeLeft
+        default: .landscapeRight
+        }
+    }
 }
 
-/// Which orientations the app currently allows. Options and Editing are portrait only
-/// (SPEC.md section 1); phase 4 widens this to landscape for the shout.
+/// When the shout leaves because the phone is turned upright (SPEC.md section 1, "Leaving the
+/// Shout"), with the Done-key case handled:
+///
+/// The shout leaves on a device-orientation change to portrait **only after the phone has been
+/// seen in a landscape orientation since the shout started** (it was landscape when the shout
+/// started, or has turned to either landscape since). A shout started by the Done key with the
+/// phone upright therefore stays up until the phone has been turned to landscape and back.
+/// Face up, face down, upside down and unknown neither leave nor reset that memory. The
+/// toolbar's back buttons leave at any time.
+struct ShoutLeaveRule: Equatable, Sendable {
+    private(set) var hasBeenLandscape: Bool
+
+    init(startOrientation: UIDeviceOrientation) {
+        hasBeenLandscape = ShoutOrientationRule.startsShout(startOrientation)
+    }
+
+    /// Feeds one orientation change; true when the shout should leave.
+    mutating func shouldLeave(after orientation: UIDeviceOrientation) -> Bool {
+        if ShoutOrientationRule.startsShout(orientation) {
+            hasBeenLandscape = true
+            return false
+        }
+        return ShoutOrientationRule.leavesShout(orientation) && hasBeenLandscape
+    }
+}
+
+/// Which orientations the app currently allows: portrait for Options and Editing (SPEC.md
+/// section 1), landscape while the shout is up. The shout's view controller reports this same
+/// mask as its supported orientations (`ShoutHostingController`), so the window's mask and the
+/// top controller's never disagree, which UIKit treats as a fatal error.
 @MainActor
 enum OrientationLock {
-    static var mask: UIInterfaceOrientationMask = .portrait
+    static private(set) var mask: UIInterfaceOrientationMask = .portrait
 
+    /// Changes the mask and asks every controller to re-read it, which rotates the interface
+    /// if its current orientation is no longer allowed.
     static func set(_ newMask: UIInterfaceOrientationMask) {
         guard newMask != mask else { return }
         mask = newMask
+        updateControllers()
+    }
+
+    /// Changes the mask without asking anything to rotate now. The shout's presentation uses
+    /// this: the presentation itself rotates to the shout's orientation, so Editing underneath
+    /// never turns on its own first.
+    static func setQuietly(_ newMask: UIInterfaceOrientationMask) {
+        mask = newMask
+    }
+
+    private static func updateControllers() {
         for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
             for window in scene.windows {
                 var controller = window.rootViewController
