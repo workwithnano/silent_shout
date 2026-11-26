@@ -12,6 +12,28 @@ struct ShoutScreen {
     }
     var back: XCUIElement { app.buttons["shout.back"] }
     var doubleBack: XCUIElement { app.buttons["shout.doubleBack"] }
+    /// The export button (1.0.1's share art), in the toolbar.
+    var share: XCUIElement { app.buttons["shout.share"] }
+
+    // The "Export Shout" sheet.
+    var exportTitle: XCUIElement { app.staticTexts["Export Shout"] }
+    var saveToCameraRoll: XCUIElement { app.buttons["Save to Camera Roll"] }
+    var sendInMessages: XCUIElement { app.buttons["Send in iMessage"] }
+    var cancel: XCUIElement { app.buttons["Cancel"] }
+    /// "Saved to Photos", shown briefly after a save.
+    var savedNote: XCUIElement { app.descendants(matching: .any).matching(identifier: "shout.saved").firstMatch }
+
+    @discardableResult
+    func waitForExportSheet(visible: Bool = true, timeout: TimeInterval = 5) -> Bool {
+        let predicate = NSPredicate(format: "exists == %@", NSNumber(value: visible))
+        return wait(for: predicate, on: exportTitle, timeout: timeout)
+            && wait(for: predicate, on: saveToCameraRoll, timeout: timeout)
+    }
+
+    @discardableResult
+    func waitUntilGone(_ element: XCUIElement, timeout: TimeInterval = 5) -> Bool {
+        wait(for: NSPredicate(format: "exists == false"), on: element, timeout: timeout)
+    }
 
     /// Waits until the shout is up showing `message`.
     @discardableResult

@@ -35,6 +35,11 @@ final class AppNavigation {
     /// take the keyboard back in between. Cleared the next time Editing is shown.
     private(set) var isReturningToOptions = false
 
+    /// True while something is presented over the shout (the export sheet, a save in progress
+    /// or its alert, the Messages composer). Turning the phone upright does not leave the shout
+    /// meanwhile; the rule is checked again when the cover goes (`ShoutLeaveRule`).
+    private(set) var isShoutCovered = false
+
     /// Decides when turning the phone upright leaves the shout (see `ShoutLeaveRule`).
     private var leaveRule: ShoutLeaveRule?
 
@@ -62,6 +67,7 @@ final class AppNavigation {
     func startShout() -> Bool {
         guard !isShouting, !isShoutOnScreen, isShowingEditing else { return false }
         leaveRule = ShoutLeaveRule(startOrientation: deviceOrientation)
+        isShoutCovered = false
         isShouting = true
         return true
     }
@@ -73,6 +79,7 @@ final class AppNavigation {
     func endShout(returningToOptions: Bool = false) {
         guard isShouting else { return }
         leaveRule = nil
+        isShoutCovered = false
         if returningToOptions { isReturningToOptions = true }
         isShouting = false
     }
@@ -90,7 +97,21 @@ final class AppNavigation {
     /// turned upright (the original's `didRotate:` on the shout, with `ShoutLeaveRule`).
     func deviceOrientationDidChange(_ orientation: UIDeviceOrientation) {
         deviceOrientation = orientation
-        if isShouting, leaveRule?.shouldLeave(after: orientation) == true {
+        guard isShouting, var rule = leaveRule else { return }
+        let leaves = rule.shouldLeave(after: orientation)
+        leaveRule = rule
+        if leaves, !isShoutCovered {
+            endShout()
+        }
+    }
+
+    /// Called by the shout as something is presented over it and when that has gone. On
+    /// uncovering, the leave rule is applied to the phone's orientation now: turned upright
+    /// (after having been on its side) while the composer was up, the shout leaves as it closes.
+    func setShoutCovered(_ covered: Bool) {
+        guard isShouting, covered != isShoutCovered else { return }
+        isShoutCovered = covered
+        if !covered, leaveRule?.leavesOnUncover(currentOrientation: deviceOrientation) == true {
             endShout()
         }
     }
@@ -131,6 +152,10 @@ enum ShoutOrientationRule {
 /// phone upright therefore stays up until the phone has been turned to landscape and back.
 /// Face up, face down, upside down and unknown neither leave nor reset that memory. The
 /// toolbar's back buttons leave at any time.
+///
+/// While something is presented over the shout (phase 5: the export sheet, the save alert, the
+/// Messages composer), turning upright does not leave; when it is dismissed the rule is applied
+/// to the orientation the phone is in then (`leavesOnUncover`).
 struct ShoutLeaveRule: Equatable, Sendable {
     private(set) var hasBeenLandscape: Bool
 
@@ -145,6 +170,13 @@ struct ShoutLeaveRule: Equatable, Sendable {
             return false
         }
         return ShoutOrientationRule.leavesShout(orientation) && hasBeenLandscape
+    }
+
+    /// Whether the shout should leave when whatever covered it goes, with the phone now in
+    /// `currentOrientation`: upright, after having been on its side. While covered, changes
+    /// are still fed to `shouldLeave(after:)` so the landscape memory stays current.
+    func leavesOnUncover(currentOrientation: UIDeviceOrientation) -> Bool {
+        ShoutOrientationRule.leavesShout(currentOrientation) && hasBeenLandscape
     }
 }
 

@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import UIKit
 
@@ -6,7 +7,10 @@ import UIKit
 struct OptionsView: View {
     @Environment(ShoutSettings.self) private var settings
     @Environment(AppNavigation.self) private var navigation
+    @Environment(\.displayScale) private var displayScale
     @State private var showsHelp = false
+    /// The longest screen edge in points, for the photo's size limit.
+    @State private var screenLength: CGFloat = 0
 
     var body: some View {
         GeometryReader { proxy in
@@ -21,6 +25,12 @@ struct OptionsView: View {
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
         }
         .background { MainBackground() }
+        .background {
+            GeometryReader { full in
+                Color.clear.onAppear { screenLength = max(full.size.width, full.size.height) }
+            }
+            .ignoresSafeArea()
+        }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { OrientationLock.set(.portrait) }
     }
@@ -32,7 +42,7 @@ struct OptionsView: View {
         return ZStack(alignment: .topLeading) {
             carousel(block, layout: layout)
                 .offset(origin: layout.carouselFrameInBlock.origin)
-            PageDots(count: optionCount(block), current: selectedIndex(block))
+            PageDots(count: optionCount(block), current: dotIndex(block))
                 .frame(width: frame.width)
                 .offset(y: OptionsLayout.pageDotsCenterY - 6.5 / 2)
             if showsHelp {
@@ -66,9 +76,29 @@ struct OptionsView: View {
                 identifier: OptionsAccessibilityID.carousel(block),
                 pageWidth: width,
                 selection: $settings.texture,
+                restingPage: settings.usesPhoto ? ShoutTexture.allCases.count - 1 : nil,
+                valueOverride: settings.usesPhoto ? CameraEntry.photoValue : nil,
+                onUserChoice: { settings.useTexture($0) },
                 accessibilityName: \.accessibilityName
             ) { texture in
                 Image(texture.carouselImageName)
+                    .opacity(settings.usesPhoto ? 0.4 : 1)
+            } trailing: {
+                // 1.0.1's camera entry: after the last texture and not a page. In 1.0.1 it sat
+                // a whole art margin beyond the scrollable width, out of reach; here it sits in
+                // the last page's trailing margin, beside the cardboard (QUESTIONS.md).
+                let side = CameraEntry.side(pageWidth: width)
+                Color.clear
+                    .frame(width: 0, height: OptionsLayout.carouselHeight)
+                    .overlay(alignment: .trailing) {
+                        CameraEntry(maxPixelLength: PhotoProcessing.maxPixelLength(
+                            screenSize: CGSize(width: screenLength, height: screenLength),
+                            scale: displayScale
+                        ))
+                        .frame(width: side, height: side)
+                        .padding(.trailing, CameraEntry.trailingInset(pageWidth: width, side: side))
+                        .fixedSize()
+                    }
             }
         case .sizing:
             OptionCarousel(
@@ -91,10 +121,12 @@ struct OptionsView: View {
         }
     }
 
-    private func selectedIndex(_ block: OptionBlock) -> Int {
+    /// The lit page dot; none for the texture carousel while the photo is the background,
+    /// since the camera entry has no dot.
+    private func dotIndex(_ block: OptionBlock) -> Int {
         switch block {
         case .font: settings.font.rawValue
-        case .texture: settings.texture.rawValue
+        case .texture: settings.usesPhoto ? -1 : settings.texture.rawValue
         case .sizing: settings.sizing.rawValue
         }
     }
@@ -132,6 +164,7 @@ struct OptionsView: View {
 enum OptionsAccessibilityID {
     static let help = "options.help"
     static let next = "options.next"
+    static let camera = "options.camera"
 
     static func carousel(_ block: OptionBlock) -> String {
         "options.carousel.\(block.key)"

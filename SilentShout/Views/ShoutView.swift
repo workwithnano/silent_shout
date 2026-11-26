@@ -18,15 +18,25 @@ struct ShoutView: View {
     /// does not re-lay itself out in portrait on the way out.
     @State private var leavingSize: CGSize?
     @State private var imageCache = ShoutImageCache()
-    /// The full-screen size, for the accessibility value (whether the marquee moves).
+    /// The full-screen size, for the accessibility value (whether the marquee moves) and the
+    /// exported picture.
     @State private var screenSize: CGSize = .zero
+
+    // Export (phase 5, SPEC.md section 9).
+    @State private var showsExportSheet = false
+    @State private var isSaving = false
+    @State private var saveProblem: PhotoSaveResult?
+    @State private var showsSavedNote = false
+    @State private var isComposing = false
+    @State private var composer = MessageComposer()
+    private let exportActions = ExportAction.available(messages: DeviceMessageAvailability())
 
     private var scene: ShoutScene {
         ShoutScene(
             text: settings.text ?? "",
             font: settings.font,
             sizing: settings.sizing,
-            background: .texture(settings.texture)
+            background: settings.background
         )
     }
 
@@ -78,19 +88,128 @@ struct ShoutView: View {
             if isChromeVisible {
                 ShoutToolbar(
                     onDoubleBack: { navigation.endShout(returningToOptions: true) },
-                    onBack: { navigation.endShout() }
+                    onBack: { navigation.endShout() },
+                    onExport: showExportSheet
                 )
                 .transition(.opacity)
                 .accessibilitySortPriority(1)
             }
+
+            if showsSavedNote {
+                SavedNote()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 24)
+                    .transition(.opacity)
+                    .allowsHitTesting(false)
+            }
         }
         .background(Color(uiColor: ShoutRenderer.backdropColor).ignoresSafeArea())
+        .alert(
+            saveProblem == .denied ? "Can't Save to Photos" : "Couldn't Save",
+            isPresented: Binding(get: { saveProblem != nil }, set: { if !$0 { saveProblem = nil } }),
+            presenting: saveProblem
+        ) { problem in
+            if problem == .denied {
+                Button("Settings") { openSettings() }
+                Button("OK", role: .cancel) {}
+            } else {
+                Button("OK", role: .cancel) {}
+            }
+        } message: { problem in
+            if problem == .denied {
+                Text("Allow Silent Shout to add photos in Settings.")
+            } else {
+                Text("The shout could not be saved to your photo library.")
+            }
+        }
+        .onChange(of: isCovered, initial: true) { _, covered in
+            navigation.setShoutCovered(covered)
+        }
+    }
+
+    /// Something is presented over the shout: taps do not reach the toolbar toggle and turning
+    /// upright does not leave until it has gone (SPEC.md section 1).
+    private var isCovered: Bool {
+        showsExportSheet || isSaving || saveProblem != nil || isComposing
     }
 
     /// A tap anywhere but a button shows or hides the toolbar over 0.4 s (SPEC.md 7).
     private func toggleChrome() {
+        guard !isCovered else { return }
         withAnimation(.easeInOut(duration: 0.4)) {
             isChromeVisible.toggle()
+        }
+    }
+
+    // MARK: Export
+
+    /// The original's UIActionSheet ("Export Shout": the actions, then Cancel), presented by the
+    /// shout's own landscape view controller (`ExportSheet`).
+    private func showExportSheet() {
+        guard !isCovered else { return }
+        showsExportSheet = true
+        let presented = ExportSheet.present(actions: exportActions) { action in
+            // Mark the next cover before lifting this one, so the shout is never uncovered in
+            // between (which could let a pending turn-upright leave under the composer).
+            if let action { perform(action) }
+            showsExportSheet = false
+        }
+        if !presented { showsExportSheet = false }
+    }
+
+    /// The picture both actions send: the shout as it is on screen, at the screen's pixel size
+    /// (PLAN ruling 8).
+    private func exportData() -> Data? {
+        ShoutExport.pngData(of: scene, size: screenSize, scale: displayScale)
+    }
+
+    private func perform(_ action: ExportAction) {
+        switch action {
+        case .saveToCameraRoll: saveToCameraRoll()
+        case .sendInMessages: sendInMessages()
+        }
+    }
+
+    /// The original saved with no feedback; the rewrite confirms briefly, or explains a refusal
+    /// with a way to Settings (QUESTIONS.md).
+    private func saveToCameraRoll() {
+        guard let data = exportData() else {
+            saveProblem = .failed
+            return
+        }
+        isSaving = true
+        let saver = ShoutExport.photoSaver
+        Task { @MainActor in
+            let result = await saver.save(data)
+            isSaving = false
+            switch result {
+            case .saved: showSavedNote()
+            case .denied, .failed: saveProblem = result
+            }
+        }
+    }
+
+    private func showSavedNote() {
+        UIAccessibility.post(notification: .announcement, argument: SavedNote.text)
+        withAnimation(.easeInOut(duration: 0.25)) { showsSavedNote = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            withAnimation(.easeInOut(duration: 0.4)) { showsSavedNote = false }
+        }
+    }
+
+    private func sendInMessages() {
+        guard let data = exportData() else { return }
+        isComposing = true
+        let presented = composer.present(imageData: data) {
+            isComposing = false
+        }
+        if !presented { isComposing = false }
+    }
+
+    private func openSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
         }
     }
 
@@ -105,6 +224,24 @@ enum ShoutAccessibilityID {
     static let text = "shout.text"
     static let back = "shout.back"
     static let doubleBack = "shout.doubleBack"
+    static let share = "shout.share"
+    static let savedNote = "shout.saved"
+}
+
+/// The brief confirmation after Save to Camera Roll: a dark capsule near the bottom that
+/// fades away after a couple of seconds. VoiceOver announces the same words.
+private struct SavedNote: View {
+    static let text = "Saved to Photos"
+
+    var body: some View {
+        Text(Self.text)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 10)
+            .background(Capsule().fill(Color.black.opacity(0.75)))
+            .accessibilityIdentifier(ShoutAccessibilityID.savedNote)
+    }
 }
 
 /// Texture and text at one size: the renderer's image, plus the moving marquee in scroll mode.
@@ -161,14 +298,15 @@ final class ShoutImageCache {
 
 /// The toolbar (SPEC.md 7, PLAN rulings 4 and 7): the original's black bar art across the top
 /// edge to edge, its buttons inside the safe area, so nothing sits under the Dynamic Island or
-/// the sensor housing. Double back, then back, at the leading end; the trailing end is kept
-/// for phase 5's export button.
+/// the sensor housing. Double back, then back, at the leading end; export (1.0.1's share
+/// button) at the trailing end, which opens the "Export Shout" sheet.
 struct ShoutToolbar: View {
     static let height: CGFloat = 44
     static let tapSize: CGFloat = 44
 
     let onDoubleBack: () -> Void
     let onBack: () -> Void
+    let onExport: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -183,11 +321,11 @@ struct ShoutToolbar: View {
                 .accessibilityHint("Returns to editing your message.")
                 .accessibilityIdentifier(ShoutAccessibilityID.back)
             Spacer(minLength: 0)
-            // Phase 5: the export button (`btns_share_UP` / `_DOWN`, 38 pt art in a 44 pt
-            // target) goes in this slot, at the trailing end as in the original.
-            Color.clear
-                .frame(width: Self.tapSize, height: Self.tapSize)
-                .accessibilityHidden(true)
+            Button(action: onExport) { Text("Export Shout") }
+                .buttonStyle(ImageButtonStyle(up: .shareUp, down: .shareDown, minimumTapSize: Self.tapSize))
+                .accessibilityLabel("Export Shout")
+                .accessibilityHint("Saves the shout to your photos or sends it in a message.")
+                .accessibilityIdentifier(ShoutAccessibilityID.share)
         }
         .padding(.horizontal, 6)
         .frame(height: Self.height)

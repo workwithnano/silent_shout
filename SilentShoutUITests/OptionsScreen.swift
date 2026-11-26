@@ -38,6 +38,13 @@ struct OptionsScreen {
         app.descendants(matching: .any).matching(identifier: "options.help.bubble.\(key)").firstMatch
     }
 
+    /// The camera entry beside the last texture (phase 5).
+    var cameraButton: XCUIElement { app.buttons["options.camera"] }
+    var choosePhoto: XCUIElement { app.buttons["Choose Photo"] }
+    var takePhoto: XCUIElement { app.buttons["Take Photo"] }
+    var useLastPhoto: XCUIElement { app.buttons["Use Last Photo"] }
+    var photoChoicesTitle: XCUIElement { app.staticTexts["Background Photo"] }
+
     var helpButton: XCUIElement { app.buttons["options.help"] }
     var nextButton: XCUIElement { app.buttons["options.next"] }
 

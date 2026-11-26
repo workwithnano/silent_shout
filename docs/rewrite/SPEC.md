@@ -84,6 +84,17 @@ to landscape since (the Done-key case, phone upright at the start). Face up, fac
 down and unknown neither leave nor reset that memory, and each shout starts the rule afresh. The
 toolbar's back and double-back buttons leave at any time.
 
+**While something is presented over the shout (phase 5).** The export sheet, a save in progress
+and its alert, and the Messages composer each count as covering the shout
+(`AppNavigation.setShoutCovered`). While covered, orientation changes are still fed to the rule
+(so its landscape memory stays current) but turning upright does not leave. When the cover goes,
+the rule is applied to the phone's orientation at that moment: upright, after having been seen in
+landscape since the shout started, and the shout leaves as the sheet or composer closes; still in
+landscape, or upright the whole time (Done-key shout), and it stays. The interface stays
+landscape throughout (the window's mask is landscape while the shout is up), so the composer is
+not torn down or re-laid out under the user. Taps on the shout do not toggle the toolbar while it
+is covered.
+
 Every exit (back, double-back, rotating to portrait) sets the app back to portrait, waits for
 that rotation to finish, then dissolves the shout away; double-back pops Editing once the dissolve
 has finished, as the original popped in the dismissal's completion. Editing does not take the
@@ -264,7 +275,7 @@ Common behaviour (`SettingsViewController`):
 | 0 | Notecard | `icon-texture_notecard` | Notecard |
 | 1 | "Postcard" | `icon-texture_whiteboard` | Whiteboard |
 | 2 | Cardboard | `icon-texture_cardboard` | Cardboard |
-| (3) | Camera | `icon-texture_camera` | 1.0.1 addition, not selectable; see section 9 |
+| (3) | Camera | `icon-texture_camera` | 1.0.1 addition, not selectable; see section 9 (finished in the rewrite as a button, not a page) |
 
 Mismatch: option 1 is labelled "Postcard" in code but shows the whiteboard icon and produces the
 whiteboard texture. The names are never shown to the user. Call it Whiteboard in the rewrite. The
@@ -300,6 +311,12 @@ Index 2 "swipe" is handled by the shout screen but has no carousel entry; its
 
 No defaults are registered; the zeros come from `integerForKey:`. Keep these key names and types
 so the meaning of stored values is unchanged.
+
+Rewrite (phase 5): one more key, `photoBackground` (Bool, default false), true while the stored
+camera photo is the background. The photo itself is one JPEG,
+`Application Support/Background/background-photo.jpg`. `texture` keeps its meaning and clamping
+(a stored 3 still reads as Cardboard) and is the texture to fall back to; if `photoBackground` is
+true but the file is missing or unreadable at launch, the texture is used and the flag is cleared.
 
 Rewrite (phase 1, `ShoutSettings`): out-of-range stored indexes are clamped to the nearest
 offered option when read (PLAN ruling 10), so a stored `lettering` 2 ("swipe", the same marquee)
@@ -464,8 +481,8 @@ background is `toolbar_shoutoverlay` (480x44, the black gradient 1.0.1 bundled b
 standing in for the 2011 black `UIToolbar`; QUESTIONS.md) stretched across the full width, and
 its buttons sit inside the safe area so none is under the Dynamic Island or sensor housing:
 double back then back at the leading end, 38 pt art centred in 44 pt targets (ruling 7), 6 pt
-from the safe-area edge. A 44 pt slot at the trailing end is kept empty for phase 5's export
-button. The status bar stays hidden when the toolbar shows (in landscape on current iPhones
+from the safe-area edge. The export button (`btns_share_UP` / `_DOWN`, label "Export Shout")
+sits at the trailing end in a 44 pt target (phase 5; section 9, "Rewrite additions"). The status bar stays hidden when the toolbar shows (in landscape on current iPhones
 there is none to show). VoiceOver reads the message as one element (label: the message; value:
 "Scrolling" while the marquee moves), whose double-tap toggles the toolbar; the buttons read
 "Back 2 Steps" and "Back 1 Step" with hints.
@@ -505,7 +522,10 @@ there is none to show). VoiceOver reads the message as one element (label: the m
 **Camera texture.** `TexturesSettingsViewController` appends a fourth setting
 (`"Camera"`, `icon-texture_camera`), then `addCameraButton` sets the page control back to
 `count - 1` (3 dots) and shrinks the scroll content to 3 pages. The intent, per the comments, is a
-camera button that sits after the last texture but is not a selectable page. As built it is
+camera button that sits after the last texture but is not a selectable page. Its image view is
+laid out like every other option, centred in a fourth page: x = (320 - 200) / 2 + 3 x 320 = 1020,
+which is 60 pt past the end of the 960 pt scrollable content, so even resting on the last page it
+is entirely off screen and only an over-scroll bounce could reveal its edge. As built it is
 invisible: `icon-texture_camera.png` exists in `assets/Icons/Textures/` but is not in the Xcode
 project's resources, and nothing handles a tap on it (the `touchesEnded` added to
 `SettingsViewController` only logs "touched"). `scrollView.canCancelContentTouches = NO` was added
@@ -517,6 +537,63 @@ copies in `assets/Help Overlay/`, see Open points 6); new launch poster and app 
 `bkgrd_texture-notecards.jpg`; `icon-texture_camera` added.
 
 **Font.** Dry-Erase switched from GraffitiPaintBrush to Kristi.
+
+### Rewrite additions (phase 5)
+
+What 1.0.1 started, finished (PLAN.md "Stubs"). Defaults that go beyond the original are in
+QUESTIONS.md.
+
+**Export.** The toolbar's trailing export button (share art, 44 pt target) opens an action
+sheet titled "Export Shout" with "Save to Camera Roll", "Send in iMessage" and "Cancel", in that
+order, presented by the shout's own landscape view controller (`ExportSheet`, a
+`UIAlertController` with the action-sheet style, the direct successor of `UIActionSheet`). It is
+given no source view on iPhone: anchored to the button, iOS 26 shows an action sheet (UIKit's or
+SwiftUI's `confirmationDialog`) as a popover and drops the Cancel row; without a source it shows
+centred with Cancel. A tap outside it cancels. Both actions use the same picture: the
+shout as it is on screen, drawn by `ShoutRenderer` at the screen's size and scale (for example
+2622x1206 px on an iPhone 17 Pro), background and text, the marquee at its start position in
+scroll mode (PLAN ruling 8; `Export/ShoutExport.swift`), as PNG.
+
+- *Save to Camera Roll* asks for add-only photo access (`PHPhotoLibrary`, `.addOnly`,
+  `NSPhotoLibraryAddUsageDescription`: "Silent Shout saves your shout to your photo library.") and
+  adds the picture. On success a "Saved to Photos" note fades in near the bottom for 2.5 s (and
+  VoiceOver announces it); on refusal an alert "Can't Save to Photos" / "Allow Silent Shout to add
+  photos in Settings." offers Settings and OK; any other failure shows "Couldn't Save" with OK.
+  The original gave no feedback at all.
+- *Send in iMessage* presents `MFMessageComposeViewController` over the shout with the picture
+  attached as `Silent Shout.png`; sending or cancelling dismisses it back to the shout as it was
+  (`Export/MessageComposer.swift`). The choice is left out of the sheet when the device cannot
+  send text or attachments or does not take PNG (always in the simulator), behind the
+  `MessageAvailability` protocol.
+- While the sheet, a save, its alert or the composer is up, the shout is covered: taps do not
+  toggle the toolbar and turning upright waits (section 1).
+
+**Camera background.** A camera entry beside the last texture in the background carousel
+(`Views/CameraEntry.swift`, in `OptionCarousel`'s `trailing` slot). It is not a page: no page
+dot, no stored index, no scrollable width. Since 1.0.1's position was unreachable (above), it sits
+in the trailing margin of the last (cardboard) page, so it shows beside the cardboard when the
+carousel rests there and scrolls with it. Only the camera disc of the 200x100 art is shown (the art
+is a temporary 2011 drawing whose right half is a scrap of cardboard), cut out round, at its own
+90 pt or smaller to fit the margin (at least 44 pt).
+
+- Tapping it opens "Background Photo": "Take Photo" (only when a camera is available;
+  `UIImagePickerController`, `NSCameraUsageDescription`: "Silent Shout uses the camera to take a
+  background for your shout."), "Choose Photo" (`PhotosPicker`, no permission needed), "Use Last
+  Photo" (when a photo is stored and not in use), Cancel.
+- The photo is drawn upright (EXIF orientation applied) and downscaled so its longest edge is at
+  most the screen's longest edge in pixels (2622 on an iPhone 17 Pro; never upscaled), then
+  stored (section 4) and made the background (`PhotoProcessing`, `PhotoBackgroundStore`,
+  `ShoutSettings.usePhoto`).
+- It is the background through `ShoutBackground` for the shout, aspect-filling the screen with
+  the fit text multiplied onto it as on a texture (sections 6.2, 6.3), and for the Editing preview,
+  aspect-filling the whole preview card with the text drawn plainly on top as the preview always
+  did (section 6.1).
+- While it is in use the carousel rests on the last page, the three textures are dimmed, no page
+  dot is lit, the camera disc becomes a round thumbnail of the photo with a white ring, the
+  carousel's VoiceOver value is "Photo" and the camera button reads "Camera, Photo in use" with the
+  selected trait.
+- Swiping the carousel (or a VoiceOver adjust) to a texture makes that texture the background
+  again; the photo stays stored for "Use Last Photo". Choosing a new photo replaces it.
 
 ## 10. Asset inventory
 
@@ -531,7 +608,7 @@ Used by the running app (each has an `@2x` sibling unless noted):
 | `bkgrd_texture-previewnotecard.jpg`, `-previewwhiteboard.jpg`, `-previewcardboard.jpg` | Editing preview background | `assets/Backgrounds/` |
 | `icon-lettering_pencil`, `_reddryerase`, `_keyboard` (.png) | Font carousel | `assets/Icons/Fonts/` |
 | `icon-texture_notecard`, `_whiteboard`, `_cardboard` (.png) | Texture carousel | `assets/Icons/Textures/` |
-| `icon-texture_camera.png` | Intended camera entry (not bundled in 1.0.1) | `assets/Icons/Textures/` |
+| `icon-texture_camera.png` | Intended camera entry (not bundled in 1.0.1); the rewrite's camera entry since phase 5 | `assets/Icons/Textures/` |
 | `scale_00000` to `scale_00039` (.png) | Lettering carousel, option 0 | 1x: `assets/Icons/Sizing/Scale-Your-Note/PNG Sequence/`; 2x: `.../PNG Sequence@2x/` |
 | `Scroll-Your-Note_00000` to `_00039` (.png) | Lettering carousel, option 1 | 1x: `assets/Icons/Sizing/Scroll-Your-Note/PNG Sequence/`; 2x: `.../PNG Sequence@2x/` |
 | `btns_help_UP`, `_DOWN`, `_ACTIVE` | Help button | `assets/Help Overlay/` (project reference) and `assets/Buttons/` (1.0.1 redraw) |
@@ -628,7 +705,8 @@ textures. The `PNG Sequence@2x` folders hold 3 files per frame (`name_NNNNN@2x.p
 7. **Back/double-back/share art is 38x38 in 33x33 buttons.** Unknown whether the overflow was
    intended; drawing them at their natural 38 pt is the safe reading.
 8. **Save to Camera Roll in scroll mode** saves the texture with no text. Probably an oversight,
-   not a feature; the plan should say what export does in scroll mode.
+   not a feature; the plan should say what export does in scroll mode. (Ruled in PLAN ruling 8;
+   done in phase 5: the export includes the marquee at its start position.)
 9. **Text saved on back.** Saving when leaving Editing with the back button relies on UIKit ending
    editing as the screen is popped. The rewrite should save explicitly.
 10. **Carousel index while over-scrolling** is unclamped in the original and can momentarily store

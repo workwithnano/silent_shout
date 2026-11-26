@@ -411,6 +411,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SilentShout/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Silent Shout";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Silent Shout uses the camera to take a background for your shout.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Silent Shout saves your shout to your photo library.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -436,6 +438,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SilentShout/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Silent Shout";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Silent Shout uses the camera to take a background for your shout.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Silent Shout saves your shout to your photo library.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

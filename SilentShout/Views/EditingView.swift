@@ -20,7 +20,7 @@ struct EditingView: View {
         GeometryReader { proxy in
             let layout = EditingLayout(size: proxy.size)
             ZStack(alignment: .topLeading) {
-                PreviewCard(text: draft, font: settings.font, texture: settings.texture, layout: layout)
+                PreviewCard(text: draft, font: settings.font, texture: settings.texture, photo: settings.activePhoto, layout: layout)
                     .frame(width: layout.cardFrame.width, height: layout.cardFrame.height)
                     .offset(x: layout.cardFrame.minX, y: layout.cardFrame.minY)
                 TextBar(
@@ -89,10 +89,14 @@ enum EditingAccessibilityID {
 /// The preview: the texture's preview art with the text fitted into the original 300x206 box
 /// (`TextFitter.preview`) and drawn at the card's scale. It always uses fit-to-box, whatever
 /// the presentation setting: the original's scrolling preview was never connected (SPEC 2.2).
+///
+/// With a camera photo as the background (phase 5) the photo aspect-fills the whole card
+/// instead of the texture's preview art; the text is drawn the same way on top.
 struct PreviewCard: View {
     let text: String
     let font: ShoutFont
     let texture: ShoutTexture
+    var photo: UIImage? = nil
     let layout: EditingLayout
 
     var body: some View {
@@ -100,10 +104,18 @@ struct PreviewCard: View {
         let label = layout.labelFrameInCard
         let fitted = TextFitter.preview.fontSize(for: text, fontName: font.fontName)
         ZStack(alignment: .topLeading) {
-            Image(texture.previewImageName)
-                .resizable()
-                .frame(width: art.width, height: art.height)
-                .offset(x: art.minX, y: art.minY)
+            if let photo {
+                Image(uiImage: photo)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: layout.cardFrame.width, height: layout.cardFrame.height)
+                    .clipped()
+            } else {
+                Image(texture.previewImageName)
+                    .resizable()
+                    .frame(width: art.width, height: art.height)
+                    .offset(x: art.minX, y: art.minY)
+            }
             PreviewLabel(
                 text: text,
                 font: font.uiFont(size: fitted * layout.cardScale) ?? .systemFont(ofSize: fitted * layout.cardScale),
