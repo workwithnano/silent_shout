@@ -8,8 +8,8 @@ enum AppRoute: Hashable, Sendable {
 }
 
 /// Where the user is, shared through the environment so any screen can move them: the
-/// navigation stack's path (Options pushes Editing; phase 4's double-back pops straight to
-/// Options), whether the shout is up, and the physical device orientation.
+/// navigation stack's path (Options pushes Editing; the shout's double-back pops straight
+/// to Options), whether the shout is up, and the physical device orientation.
 @Observable
 @MainActor
 final class AppNavigation {
@@ -27,7 +27,7 @@ final class AppNavigation {
 
     /// The physical orientation of the phone, from `UIDevice` notifications (see `RootView`).
     /// The interface stays portrait-locked on Options and Editing, as in the original, so this
-    /// is how Editing sees the phone turned on its side. Phase 4's shout screen watches it too
+    /// is how Editing sees the phone turned on its side. The shout watches it too
     /// (turning back to portrait leaves the shout).
     private(set) var deviceOrientation: UIDeviceOrientation = .unknown
 
@@ -153,7 +153,7 @@ enum ShoutOrientationRule {
 /// Face up, face down, upside down and unknown neither leave nor reset that memory. The
 /// toolbar's back buttons leave at any time.
 ///
-/// While something is presented over the shout (phase 5: the export sheet, the save alert, the
+/// While something is presented over the shout (the export sheet, the save alert, the
 /// Messages composer), turning upright does not leave; when it is dismissed the rule is applied
 /// to the orientation the phone is in then (`leavesOnUncover`).
 struct ShoutLeaveRule: Equatable, Sendable {

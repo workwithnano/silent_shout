@@ -1,8 +1,8 @@
 import Foundation
 import UIKit
 
-/// Where the camera background lives: one JPEG in Application Support (phase 5, SPEC.md
-/// section 9, "Rewrite additions"). Only one photo is kept; choosing a new one replaces it.
+/// Where the camera background lives: one JPEG in Application Support (SPEC.md section 9,
+/// "Rewrite additions"). Only one photo is kept; choosing a new one replaces it.
 /// The photo stays stored when the user swipes back to a paper texture, so "Use Last Photo"
 /// can bring it back.
 struct PhotoBackgroundStore: Sendable {
@@ -15,8 +15,7 @@ struct PhotoBackgroundStore: Sendable {
 
     /// `Application Support/Background/` in the app's container.
     static var standard: PhotoBackgroundStore {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return PhotoBackgroundStore(directory: support.appending(path: "Background", directoryHint: .isDirectory))
+        PhotoBackgroundStore(directory: URL.applicationSupportDirectory.appending(path: "Background", directoryHint: .isDirectory))
     }
 
     var fileURL: URL { directory.appending(path: Self.fileName, directoryHint: .notDirectory) }
@@ -87,46 +86,7 @@ enum PhotoProcessing {
     }
 
     /// The longest screen edge in pixels: enough for an aspect-filled full-screen background.
-    @MainActor
     static func maxPixelLength(screenSize: CGSize, scale: CGFloat) -> CGFloat {
         max(screenSize.width, screenSize.height) * scale
     }
 }
-
-#if DEBUG
-/// A photo the app draws for UI tests (`-UITestPhotoFixture`), so they never drive the system
-/// picker: a blue-to-violet gradient with lighter rings, 2000x3000 pixels stored with EXIF-style
-/// orientation `.right`, so it shows as a 3000x2000 landscape picture and exercises the
-/// orientation normalisation like a real camera photo. Every pixel is clearly blue, which the
-/// UI tests sample to tell it from the paper textures.
-enum PhotoFixture {
-    static let launchArgument = "-UITestPhotoFixture"
-
-    static var isEnabled: Bool { ProcessInfo.processInfo.arguments.contains(launchArgument) }
-
-    static func make() -> UIImage {
-        let size = CGSize(width: 2000, height: 3000)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        format.opaque = true
-        let drawn = UIGraphicsImageRenderer(size: size, format: format).image { context in
-            let cg = context.cgContext
-            let colors = [
-                UIColor(red: 0.10, green: 0.22, blue: 0.80, alpha: 1).cgColor,
-                UIColor(red: 0.42, green: 0.16, blue: 0.86, alpha: 1).cgColor,
-            ] as CFArray
-            if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 1]) {
-                cg.drawLinearGradient(gradient, start: .zero, end: CGPoint(x: size.width, y: size.height), options: [])
-            }
-            cg.setLineWidth(60)
-            for (index, radius) in stride(from: 250.0, through: 1450.0, by: 300.0).enumerated() {
-                let alpha = index.isMultiple(of: 2) ? 0.35 : 0.2
-                cg.setStrokeColor(UIColor(red: 0.6, green: 0.7, blue: 1, alpha: alpha).cgColor)
-                cg.strokeEllipse(in: CGRect(x: size.width * 0.3 - radius, y: size.height * 0.6 - radius, width: radius * 2, height: radius * 2))
-            }
-        }
-        guard let cgImage = drawn.cgImage else { return drawn }
-        return UIImage(cgImage: cgImage, scale: 1, orientation: .right)
-    }
-}
-#endif

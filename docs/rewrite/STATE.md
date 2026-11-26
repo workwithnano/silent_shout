@@ -12,7 +12,23 @@ Statuses: `todo`, `in progress`, `done`.
 | 3 | Editing screen | done | 31095b7 | `EditingView`: preview card (texture + text fitted live by `TextFitter`, scaled with the card per ruling 5), text bar on the keyboard (original art, stretched field background, `UITextField` with clear button and Done), back saves and returns to Options, Done or rotating to landscape saves and starts the shout (stub `ShoutView`, full screen, cross-dissolve), back from the stub restores text and keyboard. `make build`, `make test` (65 tests / 10 suites) and `make test-ui` (11 tests, run twice) pass. Screenshots in `docs/rewrite/screenshots/`. See Notes. |
 | 4 | Shout screen | done | 8b5717d | `ShoutView` (stub replaced) in a landscape-only `ShoutHostingController`: fit mode (texture aspect-filling the screen, text fitted by `TextFitter.shout` in the original 453x302 `UILabel`, stretched onto the 480x320 canvas scaled to fit, multiplied at alpha 0.894), scroll mode (marquee at 180 pt, alpha 0.75, 90 pt/s, 20 pt gap, 200 pt lead-in, smooth, vertically centred, full screen width), tap toggles the toolbar (0.4 s, `toolbar_shoutoverlay`, back and double-back in 44 pt targets inside the safe area, empty export slot), back to Editing with the keyboard, double-back to Options, rotation starts it and turning upright ends it (`ShoutLeaveRule`), screen kept awake. One renderer for screen and export (`ShoutRenderer`). `make build`, `make test` (93 tests / 14 suites) and `make test-ui` (17 tests, run twice) pass. Screenshots `docs/rewrite/screenshots/shout-*.png`. See Notes. |
 | 5 | 1.0.1 additions, finished | done | 054c8cf | Export button in the toolbar's slot (share art, 44 pt) opens the "Export Shout" action sheet (`ExportSheet`, UIAlertController: Save to Camera Roll, Send in iMessage, Cancel). Both use `ShoutExport` (the on-screen shout from `ShoutRenderer` at screen pixel size, PNG). Save: add-only `PHPhotoLibrary`, "Saved to Photos" note, denial alert with Settings. iMessage: `MFMessageComposeViewController` over the shout, hidden when the device cannot send (`MessageAvailability`). Shout is "covered" while sheet/save/alert/composer is up: no toolbar toggles, turning upright waits and is re-checked on dismissal (SPEC 1). Camera entry in the texture carousel's trailing slot, in the cardboard page's right margin (1.0.1's was unreachable); Take/Choose/Use Last Photo; photo normalised and downscaled to the longest screen edge in pixels, stored in Application Support, `photoBackground` key; preview and shout draw it through `ShoutBackground`. Usage strings via `INFOPLIST_KEY_*`. `make build`, `make test` (120 tests / 18 suites) and `make test-ui` (26 tests, run twice, both 0 failures) pass. Screenshots `docs/rewrite/screenshots/shout-export-*.png`, `options-camera*.png`, `editing-photo.png`, `shout-photo.png`. See Notes. |
-| 6 | Parity pass and wrap-up | todo | | |
+| 6 | Parity pass and wrap-up | done | | Carousel start fixed at the cause (default scroll anchor; an initial `ScrollPosition` id is not applied on iOS 27) and the phase 5 patch removed, with unit tests on the real scroll view; the sheet-rotation UI test now waits for the app's own report of the orientation (`-UITestShoutState`). `PARITY.md` (120 behaviours: 74 same, 42 deliberate, 0 missing, 4 not verifiable in simulator). Test hooks fenced in `Debug/UITestHooks.swift` (DEBUG only), dead code and test-only defaults removed, no force unwraps left on file loading. Screenshots retaken and upright, with a README. `README.md`, `THIRD_PARTY_NOTICES.md`, QUESTIONS reorganised (Q21 to Q24 added, phone list), PLAN release list extended. `make build`, `make test` (123 tests / 19 suites) and `make test-ui` (26 tests, three full runs, 0 failures) pass. See Notes and Final state. |
+
+## Final state (phase 6, 2026-11-27)
+
+- **Tests.** `make test`: 123 Swift Testing tests in 19 suites, 0 failures
+  (`build/Logs/Test/Test-SilentShout-2026.11.27_03-34-51-+1300.xcresult`). `make test-ui`, three
+  full runs in a row, 26 tests each, 0 failures every time
+  (`Test-SilentShout-2026.11.27_02-57-46-+1300`, `..._03-10-23-+1300`, `..._03-22-37-+1300`
+  in `build/Logs/Test/`; about 12 minutes each). `make build`: no compiler warnings (clean build).
+- **Verified in the simulator** (iPhone 17 Pro, iOS 27, 402 pt): every screen and flow in
+  `PARITY.md` marked same or deliberate change, by UI tests where a user would see it and by
+  unit tests for layout, fitting, rendering, persistence, the leave rule and the carousel's start.
+- **Verified by unit tests only:** layout at 320, 375 and 440 pt widths.
+- **Not verified:** the iOS 26 runtime, and everything under "Needs a real phone" in
+  `QUESTIONS.md` (Messages, camera, the Photos permission and save, the photo picker, marquee
+  smoothness, the exit transition, the screen staying awake, the home indicator, VoiceOver).
+- **Open:** the questions in `QUESTIONS.md` and the list in `PLAN.md` "Before any release".
 
 ## Log
 
@@ -23,8 +39,40 @@ Statuses: `todo`, `in progress`, `done`.
 - 2026-11-26: Phase 3 done. Editing placeholder removed; SPEC 6.1/6.2 corrected (text that never fits is drawn at 12 pt, not 10); questions 7 and 8 added. Phase 4 next.
 - 2026-11-27: Phase 4 done. Shout stub replaced; SPEC sections 1, 2.3, 6.2, 6.3, 7 and 10 gained the rewrite notes and the exact leave-on-portrait rule; `toolbar_shoutoverlay` added to the catalog; questions 9 to 13 added; `make test-ui UI_ONLY=...` narrows a UI run. Phase 5 next.
 - 2026-11-27: Phase 5 done. Export sheet (Save to Camera Roll with feedback, Send in iMessage when available), camera background with storage and fallback, usage strings; SPEC sections 1, 3, 4, 7, 9 (new "Rewrite additions"), 10 and open point 8 updated; questions 14 to 20 added. Phase 6 next.
+- 2026-11-27: Phase 6 done. Carousel start cause found and fixed; sheet-rotation UI test waits on app state; PARITY.md; README.md, THIRD_PARTY_NOTICES.md; QUESTIONS reorganised; screenshots retaken. The rewrite's phases are complete; release items are in PLAN.md "Before any release".
 
 ## Notes for the next phases
+
+- **Phase 6: the carousel's starting page.** Cause: on iOS 27 (the only runtime tried), a
+  `ScrollPosition` created with an id, `ScrollPosition(id: 2)` bound with `.scrollPosition`,
+  is not applied on the scroll view's first layout. The scroll view starts at offset 0 while the
+  position keeps reporting id 2, so nothing writes back and nothing corrects it. The same holds
+  for the `scrollPosition(id:)` binding form and for plain `ForEach` identities; whether the
+  page width is known on the first pass makes no difference. A `scrollTo(id:)` made after the
+  scroll view exists does work, which is why phase 5's re-apply on appear and on width change
+  hid it. Found by hosting the carousel in a window in a unit test and reading the
+  `UIScrollView`'s `contentOffset` (all three carousels at 0 with the patch off; 804 = page 2
+  with it on, or with a default scroll anchor). In phases 2 to 4 every relaunch therefore showed
+  page 0 of each carousel while its value (and the stored setting) said otherwise; the relaunch
+  UI test only read the value. The phase 2 font-swipe failure is consistent with this (its swipe
+  back started from a carousel already showing page 0) but was not reproduced. Fix:
+  `.defaultScrollAnchor(startAnchor, for: .initialOffset)` and `for: .sizeChanges`, with
+  page `i` of `n` at `x = i / (n - 1)`, which places the stored (or resting) page on the first
+  layout and after a late width; `ScrollPosition` is now created empty and used only for
+  programmatic moves (VoiceOver adjust, the photo coming into use). The patch is gone.
+  `SilentShoutTests/OptionCarouselTests.swift` checks the offset at 320, 375, 402 and 440 pt for
+  each page, with a late width, and with a resting page, and that positioning writes nothing.
+- **Phase 6: test hooks.** Every launch-argument hook is in `SilentShout/Debug/UITestHooks.swift`
+  inside `#if DEBUG` (`UITestHooks.resetSettings`, `.photoSaver`, `.photoFixture`, `.shoutState`,
+  plus `FakePhotoLibrarySaver`, `PhotoFixture` and `ShoutStateProbe`). This supersedes the file
+  locations given for them in the phase 1 to 5 notes below; the argument strings are unchanged.
+  `-UITestShoutState` adds an invisible element `debug.shoutState` to the shout whose value is
+  the device orientation the app last received and `shouting` or `leaving`; UI tests wait on it
+  with `ShoutScreen.stateAfterTurning(to:)` where nothing visible changes after a turn.
+  Checked: with the covered check removed from `AppNavigation`, the sheet test fails.
+- **Phase 6: screenshots.** All 16 were retaken from the first full phase 6 UI run, the EXIF
+  orientation set to 1, rotated by the tag (8: `sips -r 270`, 6: `sips -r 90`) and scaled with
+  `sips -Z 1400`; each was viewed. `docs/rewrite/screenshots/README.md` lists them.
 
 - **Phase 5 (export and camera).** Files: `Export/ShoutExport.swift` (`ExportAction`, `MessageAvailability` / `DeviceMessageAvailability`, `PhotoLibrarySaving` / `SystemPhotoLibrarySaver` / DEBUG `FakePhotoLibrarySaver`, `ShoutExport.image/pngData`), `Export/MessageComposer.swift` (`MessageComposer`, `ExportSheet`, `UIApplication.topViewController`), `Model/PhotoBackground.swift` (`PhotoBackgroundStore`, `PhotoProcessing`, DEBUG `PhotoFixture`), `Views/CameraEntry.swift` (`CameraEntry`, `CameraPicker`). `ShoutSettings` gained `usesPhoto`, `photo`, `photoThumbnail`, `background`, `activePhoto`, `hasStoredPhoto`, `usePhoto(_:)`, `useLastPhoto()`, `useTexture(_:)` and an injectable `photoStore`; `resetStoredOptions` also deletes the photo. `AppNavigation.setShoutCovered(_:)` and `ShoutLeaveRule.leavesOnUncover` implement the covered rule. `OptionCarousel` gained `restingPage`, `valueOverride`, `onUserChoice`; its accessibility element is now a clear overlay (no hit testing) beside the scroll view, so a button in `trailing` is its own element. It also re-applies its resting page when the page or content width changes and on appear (unless the user is scrolling): one full UI run caught a relaunch resting on page 0 with the photo active, which the initial `ScrollPosition` alone did not prevent. This touches every carousel, not only the texture one.
 - **iOS 26 action sheets.** Anchored to a view, both SwiftUI's `confirmationDialog` and a UIKit action sheet show as a popover and drop the Cancel row. The export sheet therefore has no source on iPhone (it shows centred, with Cancel). The camera choices on Options are a `confirmationDialog` popover by the camera disc, with no Cancel row (tap outside to cancel).

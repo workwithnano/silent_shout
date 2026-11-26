@@ -20,6 +20,21 @@ struct ShoutScreen {
     var saveToCameraRoll: XCUIElement { app.buttons["Save to Camera Roll"] }
     var sendInMessages: XCUIElement { app.buttons["Send in iMessage"] }
     var cancel: XCUIElement { app.buttons["Cancel"] }
+    /// The app's own report of the orientation it last received and whether the shout is still
+    /// up ("portrait shouting", "portrait leaving"); present only with `-UITestShoutState`.
+    var state: XCUIElement {
+        app.descendants(matching: .any).matching(identifier: "debug.shoutState").firstMatch
+    }
+
+    /// Waits until the app has received `orientation` (named as the app names it: `portrait`,
+    /// `landscapeLeft`, `landscapeRight`), then returns what it reported: the orientation and
+    /// `shouting` or `leaving`. Nil if it never saw that orientation.
+    func stateAfterTurning(to orientation: String, timeout: TimeInterval = 5) -> String? {
+        let seen = NSPredicate(format: "value BEGINSWITH %@", orientation + " ")
+        guard wait(for: seen, on: state, timeout: timeout) else { return nil }
+        return state.value as? String
+    }
+
     /// "Saved to Photos", shown briefly after a save.
     var savedNote: XCUIElement { app.descendants(matching: .any).matching(identifier: "shout.saved").firstMatch }
 

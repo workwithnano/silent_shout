@@ -22,7 +22,7 @@ struct ShoutView: View {
     /// exported picture.
     @State private var screenSize: CGSize = .zero
 
-    // Export (phase 5, SPEC.md section 9).
+    // Export (SPEC.md section 9).
     @State private var showsExportSheet = false
     @State private var isSaving = false
     @State private var saveProblem: PhotoSaveResult?
@@ -102,6 +102,12 @@ struct ShoutView: View {
                     .transition(.opacity)
                     .allowsHitTesting(false)
             }
+
+            #if DEBUG
+            if UITestHooks.showsShoutState {
+                ShoutStateProbe(orientation: navigation.deviceOrientation, isShouting: navigation.isShouting)
+            }
+            #endif
         }
         .background(Color(uiColor: ShoutRenderer.backdropColor).ignoresSafeArea())
         .alert(

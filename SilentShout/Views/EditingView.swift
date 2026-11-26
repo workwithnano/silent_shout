@@ -90,7 +90,7 @@ enum EditingAccessibilityID {
 /// (`TextFitter.preview`) and drawn at the card's scale. It always uses fit-to-box, whatever
 /// the presentation setting: the original's scrolling preview was never connected (SPEC 2.2).
 ///
-/// With a camera photo as the background (phase 5) the photo aspect-fills the whole card
+/// With a camera photo as the background the photo aspect-fills the whole card
 /// instead of the texture's preview art; the text is drawn the same way on top.
 struct PreviewCard: View {
     let text: String

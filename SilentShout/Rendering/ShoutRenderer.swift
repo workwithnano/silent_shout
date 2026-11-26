@@ -1,17 +1,13 @@
 import UIKit
 
-/// What the shout is drawn on. Phase 4 has the three bundled textures; phase 5 adds a photo
-/// from the camera, which is just another image here.
+/// What the shout is drawn on: a bundled texture or the camera photo, either of which is just
+/// an image here.
 struct ShoutBackground: Equatable {
     /// Identifies the picture for equality, so views can tell when to redraw without comparing
-    /// pixels: the asset name for a texture, a fresh value for any other image.
+    /// pixels: the asset name for a texture, a hash of the file for the photo
+    /// (`PhotoBackgroundStore.id(for:)`).
     let id: String
     let image: UIImage
-
-    init(id: String = UUID().uuidString, image: UIImage) {
-        self.id = id
-        self.image = image
-    }
 
     /// The full-size art of a bundled texture (SPEC.md 6.4).
     static func texture(_ texture: ShoutTexture) -> ShoutBackground {
@@ -30,7 +26,7 @@ struct ShoutScene: Equatable {
     var background: ShoutBackground
 }
 
-/// The one place a shout is drawn, on screen and (phase 5) for export and Messages.
+/// The one place a shout is drawn, on screen and for export and Messages.
 ///
 /// - Background: the original view's 25% grey, then the background image aspect-filling the
 ///   whole area (PLAN ruling 5).

@@ -27,7 +27,11 @@ struct OptionCarousel<Option: StoredOption & Hashable, Page: View, Trailing: Vie
     let page: (Option) -> Page
     let trailing: () -> Trailing
 
-    @State private var position: ScrollPosition
+    /// Only for moving the carousel after it is on screen (a VoiceOver adjust, the photo
+    /// coming into use). Where it starts is `startAnchor`'s job: on iOS 27, at least, a
+    /// `ScrollPosition` created with an id does not scroll there on the first layout; the scroll
+    /// view starts at offset 0 and the position goes on reporting the id it was given.
+    @State private var position = ScrollPosition(idType: Int.self)
     /// True from the moment the user touches the carousel until it comes to rest. Offset
     /// changes outside that window (the initial positioning, layout passes) are not choices.
     @State private var userDriven = false
@@ -55,7 +59,6 @@ struct OptionCarousel<Option: StoredOption & Hashable, Page: View, Trailing: Vie
         self.accessibilityName = accessibilityName
         self.page = page
         self.trailing = trailing
-        _position = State(initialValue: ScrollPosition(id: restingPage ?? selection.wrappedValue.rawValue))
     }
 
     var body: some View {
@@ -79,13 +82,6 @@ struct OptionCarousel<Option: StoredOption & Hashable, Page: View, Trailing: Vie
             scrollView
         }
         .frame(width: pageWidth, height: OptionsLayout.carouselHeight)
-        // The initial `ScrollPosition` is not always kept: a phase 5 UI run caught a relaunch
-        // resting on page 0 instead of the stored page (the position was applied before the
-        // pages had their full width, as far as can be told). So whenever the page width or the
-        // content width changes, and on appearing, it is put back where it should rest, unless
-        // the user is scrolling.
-        .onChange(of: pageWidth) { _, _ in restoreRestingPosition() }
-        .onAppear { restoreRestingPosition() }
         .onChange(of: restingPage) { _, page in
             guard let page else { return }
             withAnimation(.easeInOut(duration: 0.3)) {
@@ -111,10 +107,13 @@ struct OptionCarousel<Option: StoredOption & Hashable, Page: View, Trailing: Vie
         }
         .scrollIndicators(.hidden)
         .scrollTargetBehavior(.paging)
+        // The pages are equal and the trailing slot adds no width, so page `i` of `n` rests at
+        // `i / (n - 1)` of the scrollable range: this anchor puts the scroll view on the stored
+        // page on its first layout and keeps it there if the content width changes later (the
+        // first pass can come before the page width is known).
+        .defaultScrollAnchor(startAnchor, for: .initialOffset)
+        .defaultScrollAnchor(startAnchor, for: .sizeChanges)
         .scrollPosition($position)
-        .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentSize.width }) { _, _ in
-            restoreRestingPosition()
-        }
         .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.x }) { _, offset in
             lastOffset = offset
             if userDriven { select(forOffset: offset) }
@@ -139,9 +138,12 @@ struct OptionCarousel<Option: StoredOption & Hashable, Page: View, Trailing: Vie
         .clipped()
     }
 
-    private func restoreRestingPosition() {
-        guard !userDriven else { return }
-        position.scrollTo(id: restingPage ?? selection.rawValue)
+    /// Where the carousel rests: the photo's resting page, else the selected option's page.
+    private var startAnchor: UnitPoint {
+        let count = Option.allCases.count
+        guard count > 1 else { return .leading }
+        let page = min(max(restingPage ?? selection.rawValue, 0), count - 1)
+        return UnitPoint(x: CGFloat(page) / CGFloat(count - 1), y: 0.5)
     }
 
     private func select(forOffset offset: CGFloat) {

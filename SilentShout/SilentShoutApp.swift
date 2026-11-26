@@ -7,10 +7,7 @@ struct SilentShoutApp: App {
 
     init() {
         #if DEBUG
-        // UI tests launch with this argument to start from the original defaults.
-        if ProcessInfo.processInfo.arguments.contains(ShoutSettings.resetLaunchArgument) {
-            ShoutSettings.resetStoredOptions()
-        }
+        if UITestHooks.resetsSettings { ShoutSettings.resetStoredOptions() }
         #endif
         _settings = State(initialValue: ShoutSettings())
     }

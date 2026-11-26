@@ -15,8 +15,6 @@ struct BundleResourceTests {
 
     /// The names iOS registers for the bundled files, read from UIFont at runtime.
     @Test func registeredFontNames() {
-        print("Registered fonts for Later On:", UIFont.fontNames(forFamilyName: "Later On"))
-        print("Registered fonts for Kristi:", UIFont.fontNames(forFamilyName: "Kristi"))
         #expect(UIFont.familyNames.contains("Later On"))
         #expect(UIFont.fontNames(forFamilyName: "Later On") == ["lateron"])
         #expect(UIFont.familyNames.contains("Kristi"))

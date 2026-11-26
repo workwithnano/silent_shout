@@ -1,4 +1,3 @@
-import SwiftUI
 import UIKit
 
 /// An option stored in UserDefaults as its integer index, exactly as 1.0.1 stored it.
@@ -8,10 +7,10 @@ extension StoredOption {
     /// The option for a stored index. Out-of-range values (including the -1 and `count`
     /// the original could store while a carousel over-scrolled) are clamped to the
     /// nearest valid option rather than reproducing the original's fall-through cases.
+    /// Every option's raw value is its position in `allCases` (0, 1, 2...), as the original
+    /// stored the carousel page; `ShoutOptionsTests` checks that for each option type.
     static func clamped(_ index: Int) -> Self {
-        let first = allCases.first!.rawValue
-        let last = allCases.last!.rawValue
-        return Self(rawValue: min(max(index, first), last))!
+        allCases[min(max(index, 0), allCases.count - 1)]
     }
 }
 
@@ -23,7 +22,6 @@ struct InkColor: Equatable, Sendable {
     var green: Double { Double((rgb >> 8) & 0xFF) / 255 }
     var blue: Double { Double(rgb & 0xFF) / 255 }
 
-    var color: Color { Color(.sRGB, red: red, green: green, blue: blue, opacity: 1) }
     var uiColor: UIColor { UIColor(red: red, green: green, blue: blue, alpha: 1) }
 }
 
@@ -78,7 +76,6 @@ enum ShoutFont: Int, StoredOption {
     }
 
     func uiFont(size: CGFloat) -> UIFont? { UIFont(name: fontName, size: size) }
-    func font(size: CGFloat) -> Font { .custom(fontName, fixedSize: size) }
 }
 
 /// The "background" carousel (UserDefaults key `texture`). SPEC.md sections 3 and 6.4.
@@ -123,7 +120,7 @@ enum ShoutTexture: Int, StoredOption {
         }
     }
 
-    /// The camera entry 1.0.1 appended after the textures (finished in phase 5).
+    /// The art of the camera entry 1.0.1 appended after the textures (SPEC.md section 9).
     static let cameraCarouselImageName = "icon-texture_camera"
 }
 
@@ -160,6 +157,7 @@ enum ShoutSizing: Int, StoredOption {
 /// Fixed interface art by its asset catalog name (SPEC.md section 10).
 enum ChromeImage: String, CaseIterable, Sendable {
     case mainBackground = "bkgrnd_main"
+    /// Shown by the launch screen, which names it in Info.plist (`UILaunchScreen`).
     case launchPoster = "poster_001"
     case helpUp = "btns_help_UP"
     case helpDown = "btns_help_DOWN"

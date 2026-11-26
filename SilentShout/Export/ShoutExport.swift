@@ -53,7 +53,7 @@ enum PhotoSaveResult: Equatable, Sendable {
 }
 
 /// Saves image data to the photo library. A protocol so UI tests can swap in a fake
-/// (`-UITestPhotoSaver saved|denied`) instead of the real permission prompt and library.
+/// (`UITestHooks.photoSaver`) instead of the real permission prompt and library.
 protocol PhotoLibrarySaving: Sendable {
     func save(_ imageData: Data) async -> PhotoSaveResult
 }
@@ -74,29 +74,6 @@ struct SystemPhotoLibrarySaver: PhotoLibrarySaving {
         }
     }
 }
-
-#if DEBUG
-/// UI tests' stand-in for the photo library: answers at once, touches nothing on the device.
-struct FakePhotoLibrarySaver: PhotoLibrarySaving {
-    static let launchArgument = "-UITestPhotoSaver"
-
-    let result: PhotoSaveResult
-
-    func save(_ imageData: Data) async -> PhotoSaveResult { result }
-
-    /// The fake asked for on the command line (`-UITestPhotoSaver saved` or `denied`), if any.
-    static var fromLaunchArguments: FakePhotoLibrarySaver? {
-        let arguments = ProcessInfo.processInfo.arguments
-        guard let index = arguments.firstIndex(of: launchArgument), index + 1 < arguments.count else { return nil }
-        switch arguments[index + 1] {
-        case "saved": return FakePhotoLibrarySaver(result: .saved)
-        case "denied": return FakePhotoLibrarySaver(result: .denied)
-        case "failed": return FakePhotoLibrarySaver(result: .failed)
-        default: return nil
-        }
-    }
-}
-#endif
 
 /// What both export actions send: the shout as it is on screen (PLAN ruling 8), drawn by
 /// `ShoutRenderer` at the screen's size and scale, so the picture has the screen's pixel size.
@@ -119,7 +96,7 @@ enum ShoutExport {
     /// The saver to use: the UI tests' fake when one is asked for, else the system's.
     static var photoSaver: any PhotoLibrarySaving {
         #if DEBUG
-        if let fake = FakePhotoLibrarySaver.fromLaunchArguments { return fake }
+        if let fake = UITestHooks.fakePhotoSaver { return fake }
         #endif
         return SystemPhotoLibrarySaver()
     }

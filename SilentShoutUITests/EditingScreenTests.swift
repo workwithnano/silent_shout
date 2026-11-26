@@ -123,6 +123,7 @@ final class EditingScreenTests: XCTestCase {
         addTeardownBlock { @MainActor in XCUIDevice.shared.orientation = .portrait }
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication.optionsApp(reset: true)
+        app.launchArguments.append("-UITestShoutState")
         app.launch()
         let editing = EditingScreen(app: app)
         editing.open()
@@ -134,8 +135,9 @@ final class EditingScreenTests: XCTestCase {
         let shout = ShoutScreen(app: app)
         XCTAssertTrue(shout.waitForShout("Turn me"))
 
-        // The other landscape while the shout is up does not start a second one.
+        // The other landscape while the shout is up neither leaves nor starts a second one.
         XCUIDevice.shared.orientation = .landscapeRight
+        XCTAssertEqual(shout.stateAfterTurning(to: "landscapeRight"), "landscapeRight shouting")
         XCTAssertTrue(shout.text.exists)
 
         // Back with the phone still on its side: Editing, upright in portrait.

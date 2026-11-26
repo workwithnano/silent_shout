@@ -123,6 +123,22 @@ AutoScrollLabel's origin, final `QUESTIONS.md`.
   fonts with differing terms; check each allows bundling in a paid or free app.
 - A real bundle id, team, icon at current sizes, and a decision on iPad.
 
+Found during the rewrite (phases 1 to 6):
+
+- The bundle id (`com.corduroying.silentshout`) and version (`MARKETING_VERSION` 2.0, build 1)
+  are placeholders.
+- The app icon is the 2011 512 px art scaled up to 1024 px (QUESTIONS Q2). It needs larger
+  source art or a redraw, and dark and tinted variants.
+- The deployment target is iOS 26, but only the iOS 27 simulator (iPhone 17 Pro, 402 pt wide)
+  has ever run the app. Run it on iOS 26 before release.
+- Layout at 375 pt and 440 pt widths (and 320 pt) is covered by unit tests of the layout types
+  only; no UI test or screenshot has run at those widths.
+- Everything under "Needs a real phone" in QUESTIONS.md: Messages, camera capture, the Photos
+  permission and save, the photo picker, marquee smoothness, the exit transition, the screen
+  staying awake, the home indicator, and a VoiceOver walk.
+- Font licences: the bundled Kristi says SIL OFL 1.1 inside the font file and Later On says
+  "©1999, Ace Fonts"; neither has a licence file in the repository (THIRD_PARTY_NOTICES.md).
+
 ## Resuming
 
 Read `STATE.md`. Start at the first phase that is not `done`. If it is `in progress`, read its

@@ -4,7 +4,7 @@ import UIKit
 
 /// The four persisted settings, under the keys and types 1.0.1 used (SPEC.md section 4),
 /// so values stored by the original keep their meaning, plus the rewrite's camera background
-/// (phase 5) under a key of its own.
+/// under a key of its own.
 ///
 /// Every assignment writes through to UserDefaults immediately. The original wrote `text`
 /// only when editing ended; screens that edit text should hold it locally and assign it here
@@ -104,12 +104,8 @@ final class ShoutSettings {
         if usesPhoto { usesPhoto = false }
     }
 
-    /// Launch argument (debug builds) that clears the stored settings before the model is
-    /// created, so UI tests start from the original defaults.
-    nonisolated static let resetLaunchArgument = "-UITestResetSettings"
-
     /// Removes every stored key, returning every setting to the original default, and the
-    /// stored photo.
+    /// stored photo. UI tests ask for this at launch (`UITestHooks.resetSettings`).
     nonisolated static func resetStoredOptions(
         in defaults: UserDefaults = .standard,
         photoStore: PhotoBackgroundStore = .standard

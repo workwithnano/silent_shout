@@ -1,24 +1,55 @@
 # Questions for Nano
 
-None of these block the work; each has a default already applied.
+None of these blocks the work: each has a default already applied. Items keep the numbers they
+had when they were first asked (other documents refer to them as Q1, Q2 and so on), so the
+numbers are not in order below.
 
-1. Help button art: the app uses the set the 1.0.1 project references (`assets/Help Overlay/`). There is a redrawn set in `assets/Buttons/` that the project never referenced. Which did you and Anthony intend?
-2. App icon: no art larger than the 2011 512 px `Icon-512.png` exists, so the app icon is that file scaled to 1024 px with `sips` (soft at full size, and no dark or tinted variants). Is there larger source art, or should the icon be redrawn before any release?
-3. Launch screen: the default shows the original `poster_001` (320x480 pt) centred on a dark grey sampled from it, so tall screens show a plain band above and below. Keep, or use a plain colour only?
-4. Options background on large screens: `bkgrnd_main` (320x461) was sized for one 320x460 screen and shows hard seams when repeated (an edge line along its top and bottom, unmatched left/right edges). The default trims the edge rows and tiles mirrored copies, keeping the art at its own size. Alternatives: plain repetition with seams, or one copy scaled to fill (soft, since it would be upscaled about 1.9x).
-5. Options vertical spacing on tall screens: the three option blocks keep their original 139 pt size and are spread evenly over the height above the buttons (on an iPhone 17 Pro about 100 pt of extra space between blocks). The alternative is to keep them packed at the top as in the 320x460 original and leave the space above the buttons empty. See `docs/rewrite/screenshots/options.png`.
-6. VoiceOver names for the options (the original had none): Pencil, Red dry-erase marker, Keyboard; Notecard, Whiteboard, Cardboard; "Scale your note", "Scroll your note" (the words the animations show). Change freely.
-7. Editing preview on tall screens: the preview card shows the part of the texture the original showed (the lower 320x206 pt; the top 20 pt with its dark band sat under the black status bar), scaled to the full screen width (about 1.26x on an iPhone 17 Pro, 1.37x on a Pro Max, so the 2x art is upscaled a little, as ruling 5 allows) and centred in the space between the status bar and the text bar, with the main background above and below it (about 90 pt each on an iPhone 17 Pro). Alternatives: keep the card at its original 320 pt size, or push it up under the status bar, or down onto the text bar as in the original's stack. See `docs/rewrite/screenshots/editing-short.png`.
-8. Saving the message: besides the original's save points (back, Done, rotating to landscape), the rewrite also saves when the app leaves the foreground while Editing is showing, so a message is not lost if the app is closed from there. The original did not. Keep?
-9. Screen kept awake on the shout: the rewrite keeps the screen from dimming and locking while the shout is showing (`isIdleTimerDisabled`), and restores the setting on leaving. The original did not, so a shout held up for a while went dark. A sign that sleeps is not much of a sign, so this is applied by default. Keep?
-10. Shout toolbar art and height: the original drew the system black-style `UIToolbar`, 38 pt tall. That bar no longer looks like 2011, so the rewrite uses `toolbar_shoutoverlay` (a 480x44 black gradient that was in `assets/Toolbars/` but never used by 1.0.1) at its own 44 pt height, stretched across the screen. The alternative is a plain black bar at 38 pt. See `docs/rewrite/screenshots/shout-toolbar.png`.
-11. Reduce Motion: the marquee keeps scrolling when Reduce Motion is on. Stopping it would leave a long message unreadable and change the scroll mode itself, so the default behaviour is unchanged. One option would be to fall back to fit mode when Reduce Motion is on; say if you want that.
-12. Marquee width on wide screens: the marquee runs across the full screen width (about 696 reference points on an iPhone 17 Pro) rather than only the centred 480x320 canvas, so the text enters at one edge of the screen and leaves at the other, as it did on the 480 pt original. A message is still when it fits that width and scrolls when it does not; on a 480 pt screen the threshold was 480.
-13. Leaving the shout: every exit first rotates the app back to portrait and then dissolves the shout away, so Editing comes back in portrait rather than laid out in landscape for a moment. The original dissolved straight from the landscape shout to portrait Editing. Matching that exactly needs a custom transition. Worth a look on a phone (the simulator runs confirm the end state, not how the transition feels).
-14. Save to Camera Roll feedback: the original saved silently. The rewrite shows a brief "Saved to Photos" note (2.5 s, also announced by VoiceOver) on success and, if photo access is refused, an alert "Can't Save to Photos" with a Settings button. Applied by default. See `docs/rewrite/screenshots/shout-export-sheet.png`.
-15. Camera entry position: in 1.0.1 the camera image sat 60 pt past the end of the carousel's scrollable width, so it could never be seen or tapped. The rewrite puts it in the empty margin to the right of the cardboard, visible when the carousel rests on the last texture, still not a page and without a dot. Only the camera disc of the art is shown, cut out round: the 2011 art (committed as "completely temporary/ugly") is 200x100 with a scrap of cardboard in its right half. New camera art would be worth drawing before any release. See `docs/rewrite/screenshots/options-camera.png`.
-16. Showing that the photo is in use: the carousel rests on the last texture, the three textures are dimmed, no page dot is lit, and the camera disc becomes a round thumbnail of the photo with a white ring. Swiping to any texture (even dragging off the cardboard and letting it settle back) switches back to that texture. See `docs/rewrite/screenshots/options-camera-photo.png`.
-17. "Use Last Photo": added to the camera choices when a photo is stored but not in use (the photo is kept when switching back to a texture). Only one photo is ever kept. Remove the choice if it adds clutter.
-18. Preview on a photo: the photo fills the whole preview card and the text is drawn plainly on top, as the original preview always drew it (SPEC 6.1, no blend). The shout multiplies the ink onto the photo as it does onto a texture, so dark ink stays dark and red ink on a dark photo is dim. See `editing-photo.png` and `shout-photo.png`.
-19. Exported picture: PNG at the screen's full pixel size (2622x1206 on an iPhone 17 Pro), the same for the photo library and Messages (attached as "Silent Shout.png"). JPEG would make smaller messages; PNG keeps the lettering sharp.
-20. Turning upright while the export sheet, an alert or the Messages composer is up does not leave the shout; when it closes, the shout leaves if the phone is upright by then (SPEC section 1). The composer is shown in landscape over the landscape shout. Neither the composer nor real sending can be tried in the simulator; worth a check on a phone.
+## Needs your decision
+
+Things your taste decides. The default is what the app does now.
+
+- **Q1. Help button art.** The app uses the set the 1.0.1 project referenced (`assets/Help Overlay/`); a redrawn set in `assets/Buttons/` was never referenced. Default: the referenced set. Which did you and Anthony intend?
+- **Q2. App icon.** No art larger than the 2011 `Icon-512.png` exists, so the icon is that file scaled to 1024 px (soft at full size, no dark or tinted variants). Default: the upscaled icon until there is larger source art or a redraw.
+- **Q3. Launch screen.** Default: the original `poster_001` (320x480 pt) centred on a dark grey sampled from it, which leaves a plain band above and below on tall screens. The alternative is a plain colour only.
+- **Q4. Options background.** `bkgrnd_main` was made for one 320x460 screen and shows seams when repeated. Default: trim its edge rows and tile mirrored copies at the art's own size; the alternatives are plain repetition with seams, or one copy scaled up about 1.9x to fill.
+- **Q5. Options spacing on tall screens.** Default: the three 139 pt blocks are spread evenly over the height above the buttons (about 100 pt between blocks on an iPhone 17 Pro). The alternative keeps them packed at the top as on the 320x460 original. See `screenshots/options.png`.
+- **Q7. Editing preview size.** Default: the card shows the part of the texture the original showed (the lower 320x206 pt), scaled to the screen width (about 1.26x on an iPhone 17 Pro) and centred between the status bar and the text bar. Alternatives: keep it at 320 pt, push it up under the status bar, or down onto the text bar. See `screenshots/editing-short.png`.
+- **Q10. Shout toolbar art.** The original drew the system black `UIToolbar` at 38 pt. Default: `toolbar_shoutoverlay`, a 480x44 black gradient that sat unused in `assets/Toolbars/`, stretched across the screen at 44 pt. The alternative is a plain black bar at 38 pt. See `screenshots/shout-toolbar.png`.
+- **Q13. Exit transition.** Default: every exit rotates the app to portrait first and then dissolves the shout away, so Editing never shows laid out in landscape. The original dissolved straight from the landscape shout to portrait Editing, which needs a custom transition to match; worth judging on a phone.
+- **Q15. Camera entry position and art.** In 1.0.1 the camera image sat beyond the scrollable width and could never be seen. Default: a round camera disc in the empty margin right of the cardboard, not a page and without a dot, cut from the 2011 art that was committed as "completely temporary/ugly". New camera art would be worth drawing. See `screenshots/options-camera.png`.
+- **Q16. Showing the photo is in use.** Default: the carousel rests on the last texture, the textures are dimmed, no dot is lit, and the camera disc becomes a round thumbnail of the photo with a white ring; any swipe that settles on a texture, even back on the cardboard, switches back to it. See `screenshots/options-camera-photo.png`.
+- **Q22. Art size.** Default: buttons, carousel art, help bubbles and bars are drawn at their original point size and never upscaled, as the plan says; the Editing preview card and the shout's 480x320 canvas scale with the screen (ruling 5), so their 2x art is upscaled a little on large phones. The alternative is to keep those two at their original size too and leave more of the background showing.
+
+## Defaults applied, tell me if wrong
+
+Behaviour choices where the default is probably right.
+
+- **Q6. VoiceOver names.** The original had none. Default: Pencil, Red dry-erase marker, Keyboard; Notecard, Whiteboard, Cardboard; "Scale your note", "Scroll your note" (the words the animations show).
+- **Q8. Saving the message.** Default: besides back, Done and rotating, the text is also saved when the app leaves the foreground on Editing, so it is not lost if the app is closed there. The original did not do this.
+- **Q9. Screen kept awake on the shout.** Default: the screen does not dim or lock while the shout shows, and the setting is restored on leaving. The original let a held-up shout go dark.
+- **Q11. Reduce Motion.** Default: the marquee keeps scrolling with Reduce Motion on, since stopping it would leave a long message unreadable. Falling back to fit mode is an option.
+- **Q12. Marquee width.** Default: the marquee runs across the full screen width (about 696 reference points on an iPhone 17 Pro), entering at one edge and leaving at the other as it did on the 480 pt original; a message scrolls only when it is wider than that.
+- **Q14. Save to Camera Roll feedback.** The original saved silently. Default: a "Saved to Photos" note for 2.5 s (also announced by VoiceOver), and an alert with a Settings button if photo access is refused. See `screenshots/shout-export-sheet.png`.
+- **Q17. "Use Last Photo".** Default: offered when a photo is stored but not in use; only one photo is ever kept. Remove it if it adds clutter.
+- **Q18. Preview on a photo.** Default: the photo fills the preview card with the text drawn plainly on top, as the preview always drew text; the shout multiplies the ink onto the photo as onto paper, so red ink on a dark photo is dim. See `editing-photo.png` and `shout-photo.png`.
+- **Q19. Exported picture.** Default: PNG at the screen's full pixel size (2622x1206 on an iPhone 17 Pro), the same for Photos and Messages (attached as "Silent Shout.png"). JPEG would make smaller messages; PNG keeps the lettering sharp.
+- **Q20. Turning upright under the export sheet.** Default: the shout stays while the sheet, an alert or the Messages composer is up, and leaves when it closes if the phone is upright by then. The composer is shown in landscape over the shout.
+- **Q21. Carousel start.** 1.0.1 scrolled each carousel to its stored page with an animation as the screen loaded. Default: each carousel simply starts on its stored page.
+- **Q23. AutoScrollLabel credit.** The 1.0.1 README credits AutoScrollLabel to Danny Baranowsky, but its source headers say "Created by Brian Stormont", "Copyright 2009 Stormy Productions", and the README's link is to blog.stormyprods.com. Default: the README keeps the original notice word for word and `THIRD_PARTY_NOTICES.md` records both.
+- **Q24. Credits.** The repository supports two credits: Neil "Nano" Anderson wrote the code (file headers, commits), and Anthony Cafaro supplied the 1.0.1 button art (commits 525320d and 42c68f5). Default: the README says exactly that; tell me what else Anthony drew and it can say more.
+
+## Needs a real phone
+
+Gathered from every phase's notes. None of these can be seen in the simulator.
+
+- Sending a shout in Messages: the composer, its orientation over the landscape shout, sending, cancelling, and the return to the shout (the simulator cannot send, so the choice is hidden there).
+- The shout leaving when the composer is closed with the phone upright.
+- Taking a photo with the camera.
+- The Photos add-only permission prompt and an actual save to the library (UI tests use a fake saver).
+- The system photo picker (UI tests use a drawn fixture photo).
+- Marquee smoothness and CPU cost (it is redrawn on the CPU every frame, at up to 60 fps).
+- The exit transition frame by frame: rotation to portrait, then the dissolve (Q13).
+- The screen staying awake while the shout shows (Q9).
+- The home indicator hiding on the shout.
+- A VoiceOver walk through all three screens (the labels and actions are covered by UI tests; how it feels to explore is not).
+- The iOS 26 runtime: only the iOS 27 simulator has run the app.

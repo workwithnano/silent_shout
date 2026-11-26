@@ -262,7 +262,7 @@ struct ShoutRendererTests {
             UIColor.white.setFill()
             context.fill(CGRect(x: 0, y: 0, width: 48, height: 32))
         }
-        let scene = ShoutScene(text: "I", font: .keyboard, sizing: .scaleToFit, background: ShoutBackground(image: white))
+        let scene = ShoutScene(text: "I", font: .keyboard, sizing: .scaleToFit, background: ShoutBackground(id: "white", image: white))
         let image = ShoutRenderer.image(of: scene, size: ShoutCanvas.referenceSize, scale: 1)
         let darkest = try darkestLuma(image)
         let expected = (1 - ShoutCanvas.fitTextAlpha) * 255
@@ -274,7 +274,7 @@ struct ShoutRendererTests {
             context.fill(CGRect(x: 0, y: 0, width: 48, height: 32))
         }
         // Dry-erase ink is #E93232: normal blending would leave the red channel near 222.
-        let redScene = ShoutScene(text: "I", font: .dryErase, sizing: .scaleToFit, background: ShoutBackground(image: grey))
+        let redScene = ShoutScene(text: "I", font: .dryErase, sizing: .scaleToFit, background: ShoutBackground(id: "grey", image: grey))
         let pixel = try darkestPixel(ShoutRenderer.image(of: redScene, size: ShoutCanvas.referenceSize, scale: 1))
         #expect(pixel.red < 0.5 * 255 * 0.95, "red channel darkened by the multiply: \(pixel)")
         #expect(pixel.green < 0.5 * 255 * 0.4)
@@ -293,8 +293,10 @@ struct ShoutRendererTests {
         #expect(texture == .texture(.cardboard))
         #expect(texture != .texture(.notecard))
         #expect(texture.image.size == CGSize(width: 480, height: 320))
-        let photo = ShoutBackground(image: UIImage())
-        #expect(photo != ShoutBackground(image: photo.image), "each other image is its own background")
+        // Equality is by id alone, so the shout's image cache redraws exactly when the id changes.
+        let photo = ShoutBackground(id: "photo-1", image: UIImage())
+        #expect(photo == ShoutBackground(id: "photo-1", image: UIImage()))
+        #expect(photo != ShoutBackground(id: "photo-2", image: photo.image))
     }
 
     @Test func marqueeMotionUsesTheLineWidthAt180() {

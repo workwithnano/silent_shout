@@ -260,6 +260,11 @@ Common behaviour (`SettingsViewController`):
   change the page. `changeSettingsPage:` exists but is unreachable.
 - No sound is played (the swish call is commented out).
 
+**In the rewrite (phase 6).** Each carousel starts on its stored page directly, with no
+animated scroll to it (QUESTIONS Q21). The start position comes from a default scroll anchor
+(page `i` of `n` at `i / (n - 1)` of the scrollable width); an initial `ScrollPosition` id is
+not applied on the first layout on iOS 27 (STATE.md, phase 6 notes).
+
 ### Font ("writing tool"), key `font`
 
 | Index | Name in code | Carousel image |
@@ -579,7 +584,8 @@ is a temporary 2011 drawing whose right half is a scrap of cardboard), cut out r
 - Tapping it opens "Background Photo": "Take Photo" (only when a camera is available;
   `UIImagePickerController`, `NSCameraUsageDescription`: "Silent Shout uses the camera to take a
   background for your shout."), "Choose Photo" (`PhotosPicker`, no permission needed), "Use Last
-  Photo" (when a photo is stored and not in use), Cancel.
+  Photo" (when a photo is stored and not in use). The choices are a popover by the camera disc,
+  which iOS 26 shows without a Cancel row; a tap outside it cancels.
 - The photo is drawn upright (EXIF orientation applied) and downscaled so its longest edge is at
   most the screen's longest edge in pixels (2622 on an iPhone 17 Pro; never upscaled), then
   stored (section 4) and made the background (`PhotoProcessing`, `PhotoBackgroundStore`,

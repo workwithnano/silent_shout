@@ -3,7 +3,7 @@ import XCTest
 @MainActor
 extension XCUIApplication {
     /// The app, optionally told to clear its stored settings before it starts
-    /// (`ShoutSettings.resetLaunchArgument`, debug builds only).
+    /// (`UITestHooks.resetSettings` in the app, debug builds only).
     static func optionsApp(reset: Bool) -> XCUIApplication {
         let app = XCUIApplication()
         if reset { app.launchArguments.append("-UITestResetSettings") }

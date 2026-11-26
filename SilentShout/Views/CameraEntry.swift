@@ -110,8 +110,7 @@ struct CameraEntry: View {
 
     private func chooseFromLibrary() {
         #if DEBUG
-        // UI tests: the fixture stands in for the system picker.
-        if PhotoFixture.isEnabled {
+        if UITestHooks.usesPhotoFixture {
             use(PhotoFixture.make())
             return
         }

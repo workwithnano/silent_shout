@@ -22,7 +22,7 @@ struct TextFitter: Equatable, Sendable {
     /// The Editing preview: a 300 pt wide box, fits at 206 pt or less, 200 pt down to 12 pt.
     static let preview = TextFitter(boxWidth: 300, boxHeight: 206, maxSize: 200, minSize: 12, step: 2)
 
-    /// The shout in fit mode (phase 4): a 420 pt wide box, fits at 280 pt or less, 360 pt down to 12 pt.
+    /// The shout in fit mode: a 420 pt wide box, fits at 280 pt or less, 360 pt down to 12 pt.
     static let shout = TextFitter(boxWidth: 420, boxHeight: 280, maxSize: 360, minSize: 12, step: 2)
 
     /// Every size the rule tries, largest first: `maxSize`, `maxSize - step`, ..., `minSize`.

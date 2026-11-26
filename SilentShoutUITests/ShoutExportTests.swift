@@ -104,12 +104,15 @@ final class ShoutExportTests: XCTestCase {
     }
 
     /// Turning the phone upright while the sheet is up keeps the shout; closing the sheet then
-    /// leaves it, as turning upright would have (SPEC.md section 1).
+    /// leaves it, as turning upright would have (SPEC.md section 1). Nothing on screen changes
+    /// when the phone turns under the sheet, so the test waits for the app's own report that it
+    /// has received the turn (`-UITestShoutState`) before checking that the shout stayed.
     @MainActor
     func testPortraitWhileSheetIsUpWaitsForTheSheet() {
         addTeardownBlock { @MainActor in XCUIDevice.shared.orientation = .portrait }
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication.optionsApp(reset: true)
+        app.launchArguments.append("-UITestShoutState")
         app.launch()
         let editing = EditingScreen(app: app)
         editing.open()
@@ -118,14 +121,15 @@ final class ShoutExportTests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         let shout = ShoutScreen(app: app)
         XCTAssertTrue(shout.waitForShout("Turn"))
+        XCTAssertEqual(shout.stateAfterTurning(to: "landscapeLeft"), "landscapeLeft shouting")
         shout.showToolbar()
         shout.press(shout.share)
         XCTAssertTrue(shout.waitForExportSheet())
 
         XCUIDevice.shared.orientation = .portrait
-        // The orientation notification reaches the app's main thread before it answers the
-        // next accessibility query, so these see the state after the change.
-        XCTAssertTrue(shout.text.exists, "the shout stays while the sheet is up")
+        XCTAssertEqual(shout.stateAfterTurning(to: "portrait"), "portrait shouting",
+                       "the app saw the phone turn upright and kept the shout while the sheet is up")
+        XCTAssertTrue(shout.text.exists)
         XCTAssertTrue(shout.cancel.exists)
 
         shout.press(shout.cancel)
