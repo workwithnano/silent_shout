@@ -6,14 +6,20 @@ final class LaunchSmokeTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunchShowsPlaceholderWithEveryFontLoaded() {
-        let app = XCUIApplication()
+    func testLaunchShowsOptionsScreen() {
+        let app = XCUIApplication.optionsApp(reset: true)
         app.launch()
-        XCTAssertTrue(app.staticTexts["placeholder.title"].waitForExistence(timeout: 30))
-        for index in 0..<3 {
-            let label = app.staticTexts["placeholder.font.\(index)"]
-            XCTAssertTrue(label.exists, "font row \(index) missing")
-            XCTAssertTrue(label.label.hasSuffix("loaded"), "font row \(index): \(label.label)")
-        }
+        let options = OptionsScreen(app: app)
+        XCTAssertTrue(options.carousel("font").waitForExistence(timeout: 30))
+        XCTAssertTrue(options.carousel("texture").exists)
+        XCTAssertTrue(options.carousel("lettering").exists)
+        XCTAssertTrue(options.helpButton.exists)
+        XCTAssertTrue(options.nextButton.exists)
+        XCTAssertEqual(options.helpButton.label, "Help")
+        XCTAssertEqual(options.nextButton.label, "Shout")
+        // Fresh settings: the original defaults.
+        XCTAssertEqual(options.value(of: "font"), "Pencil")
+        XCTAssertEqual(options.value(of: "texture"), "Notecard")
+        XCTAssertEqual(options.value(of: "lettering"), "Scale your note")
     }
 }

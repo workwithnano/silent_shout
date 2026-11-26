@@ -68,6 +68,15 @@ enum ShoutFont: Int, StoredOption {
         }
     }
 
+    /// Spoken by VoiceOver. The original never showed option names; these describe the art.
+    var accessibilityName: String {
+        switch self {
+        case .pencil: "Pencil"
+        case .dryErase: "Red dry-erase marker"
+        case .keyboard: "Keyboard"
+        }
+    }
+
     func uiFont(size: CGFloat) -> UIFont? { UIFont(name: fontName, size: size) }
     func font(size: CGFloat) -> Font { .custom(fontName, fixedSize: size) }
 }
@@ -105,6 +114,15 @@ enum ShoutTexture: Int, StoredOption {
         }
     }
 
+    /// Spoken by VoiceOver.
+    var accessibilityName: String {
+        switch self {
+        case .notecard: "Notecard"
+        case .whiteboard: "Whiteboard"
+        case .cardboard: "Cardboard"
+        }
+    }
+
     /// The camera entry 1.0.1 appended after the textures (finished in phase 5).
     static let cameraCarouselImageName = "icon-texture_camera"
 }
@@ -122,6 +140,14 @@ enum ShoutSizing: Int, StoredOption {
         switch self {
         case .scaleToFit: "scale_"
         case .scroll: "Scroll-Your-Note_"
+        }
+    }
+
+    /// Spoken by VoiceOver; the words the animations themselves show.
+    var accessibilityName: String {
+        switch self {
+        case .scaleToFit: "Scale your note"
+        case .scroll: "Scroll your note"
         }
     }
 

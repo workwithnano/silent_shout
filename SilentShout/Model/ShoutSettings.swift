@@ -38,6 +38,17 @@ final class ShoutSettings {
         didSet { defaults.set(sizing.rawValue, forKey: Key.lettering) }
     }
 
+    /// Launch argument (debug builds) that clears the stored settings before the model is
+    /// created, so UI tests start from the original defaults.
+    nonisolated static let resetLaunchArgument = "-UITestResetSettings"
+
+    /// Removes all four stored keys, returning every setting to the original default.
+    nonisolated static func resetStoredOptions(in defaults: UserDefaults = .standard) {
+        for key in [Key.text, Key.font, Key.texture, Key.lettering] {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         // `integer(forKey:)` gives 0 for an absent key, which is the original's default for all three.

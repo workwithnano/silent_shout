@@ -111,6 +111,16 @@ the titles as accessibility labels.
 Help overlay `helpView`: (0, 0, 320, 460), on top of everything, alpha 0, user interaction
 disabled (touches pass through to the carousels and buttons). See section 8.
 
+**In the rewrite (phase 2).** `OptionsLayout` computes these frames from the safe-area size.
+All three carousels use y 9.5 (the lettering block's 9 is one of the half-point accidents of
+PLAN ruling 11). The area above the buttons is split into three equal slots with a 139 pt block
+centred in each, which reproduces the frames above exactly on a 320x460 area and spreads the
+blocks evenly on taller screens; pages are screen-wide with the 200x100 art centred; the
+buttons keep their 6 pt side and 5 pt bottom margins inside the safe area. The 320x461 background
+does not tile cleanly (its top 1.5 pt and bottom 2 pt are an edge line, and its left and right
+edges do not match), which never showed on a 320x460 screen; the rewrite trims those rows and
+tiles mirrored copies (QUESTIONS.md).
+
 Left over in the XIB and not part of the visible screen: a second copy of the preview view (at
 y -246, off screen) and of the text bar (at y 461.5, off screen), with their own controller
 objects. The text field there has an Editing-Did-End-On-Exit connection to a `showInfo:` action
@@ -355,6 +365,10 @@ Buttons are only tappable while the toolbar is visible in practice (alpha 0 view
 | `help_bubble-background` | (8, 149, 103, 45) | Texture block |
 | `help_bubble-presentation` | (8, 287, 103, 45) | Lettering block |
 
+- Rewrite (phase 2): each bubble keeps its offset from the option art it points at (51 or
+  52 pt left of the art's left edge, the original's 9 or 8 pt against art at x 60) and its y
+  inside its block, so it follows the block on any screen size. VoiceOver reads the bubbles
+  only while help is showing (labels "Writing Tool", "Background", "Presentation").
 - The full-screen dimming image `help_overlay.png` (320x460) is in the overlay but marked hidden
   in the XIB, so it never shows.
 - `help_bubble-font`, `help_bubble-sizing` and `help_bubble-next` are bundled and unused.
