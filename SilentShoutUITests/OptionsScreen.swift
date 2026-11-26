@@ -32,9 +32,6 @@ struct OptionsScreen {
     var helpButton: XCUIElement { app.buttons["options.help"] }
     var nextButton: XCUIElement { app.buttons["options.next"] }
 
-    var editingPlaceholder: XCUIElement { app.staticTexts["editing.placeholder"] }
-    var editingBack: XCUIElement { app.buttons["editing.back"] }
-
     /// Waits until the carousel's accessibility value equals `expected`.
     @discardableResult
     func waitForValue(_ expected: String, of key: String, timeout: TimeInterval = 5) -> Bool {

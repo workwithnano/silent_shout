@@ -76,17 +76,18 @@ final class OptionsScreenTests: XCTestCase {
         let app = XCUIApplication.optionsApp(reset: true)
         app.launch()
         let options = OptionsScreen(app: app)
+        let editing = EditingScreen(app: app)
         XCTAssertTrue(options.nextButton.waitForExistence(timeout: 30))
 
         options.nextButton.tap()
-        XCTAssertTrue(options.editingPlaceholder.waitForExistence(timeout: 5))
+        XCTAssertTrue(editing.textField.waitForExistence(timeout: 5))
+        XCTAssertTrue(editing.preview.exists)
         XCTAssertFalse(options.nextButton.isHittable)
 
-        options.editingBack.tap()
+        editing.backButton.tap()
         XCTAssertTrue(options.nextButton.waitForExistence(timeout: 5))
         XCTAssertTrue(options.carousel("font").waitForExistence(timeout: 5))
-        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: options.editingPlaceholder)
-        XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 5), .completed)
+        XCTAssertTrue(editing.waitUntilGone(editing.textField))
     }
 
     /// Screenshots of the Options screen, help off and help on, kept in the result bundle

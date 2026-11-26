@@ -154,6 +154,35 @@ Behaviour:
 - The preview's texture and font are read from UserDefaults when the screen appears.
 - Text is written to UserDefaults only when editing ends (Done, rotation to landscape, back).
 
+**In the rewrite (phase 3).** `EditingView` (`Views/EditingView.swift`), laid out by
+`EditingLayout` from the safe area above the keyboard:
+
+- The text bar keeps its 41 pt height and original art at original point sizes and sits on the
+  keyboard at full width. `toolbar_Textfield` tiles across it; the back button's 33 pt art is at
+  (5.5, 3.5) with a 44 pt tap area; `textfield` keeps its 14 pt rounded ends and stretches between
+  them from x 46 to 12 pt from the right (on the 320 pt original it was squeezed from 272 to
+  262 pt); the field runs from x 53 to 13 pt from the right, 28 pt tall (ruling 11: not 31).
+- The preview card shows what the original showed of the preview: the lower 320x206 pt of the
+  320x226 art. The top 20 pt were under the opaque black status bar, and the art has a dark band
+  there (straight on cardboard, curved on the notecard) for that reason. The label box is
+  (10, 0, 300, 206) in that reference card. The card is scaled uniformly to the screen width (or
+  less if the height above the bar is short) and centred between the safe-area top and the bar
+  (QUESTIONS.md). The main background shows around it. The 1 pt x offset is not reproduced.
+- The field is a `UITextField` (clear button while editing, Helvetica 15, black, sentence
+  capitalisation, autocorrection, dark keyboard, Done). It is drawn in the light style because it
+  sits on white art, so the clear button shows.
+- Saving (ruling 9) is explicit: the text is written to `text` when the back button is tapped, when
+  the shout starts (Done or rotation), and also when the app leaves the foreground while Editing
+  shows (the original lost unsaved text if the app was killed there). Ending editing has no side
+  effects, so the `flipScreen` flag is not needed: the back button saves and pops, Done and
+  rotation save and call `AppNavigation.startShout()`.
+- `shouting` is `AppNavigation.isShouting` plus `isShoutOnScreen` (true until the dismissal's
+  dissolve has finished); no shout starts while either is set, or when Editing is not the top
+  screen.
+- Device orientation: `RootView` forwards `UIDevice.orientationDidChangeNotification` to
+  `AppNavigation.deviceOrientation`; Editing starts the shout when it changes to either landscape
+  (`ShoutOrientationRule`). The interface itself stays portrait.
+
 ### 2.3 Shout (`FlipsideView.xib`, 480x320 landscape, status bar hidden)
 
 View background 25% white (dark grey), fully covered by the background image.
@@ -287,15 +316,28 @@ The rewrite bundles only `later_on.ttf` and `Kristi.ttf` (in `SilentShout/Fonts/
 - Text: current field text. Font and colour: section 5 for the saved `font`.
 - Start at 200 pt and step down by 2 pt (200, 198, ... 12). For each size, measure the text
   word-wrapped in a box 300 pt wide and unlimited height. Stop at the first size whose measured
-  height is <= 206 pt. If none fits, the loop ends with size 10.
+  height is <= 206 pt. If none fits, the text is drawn at 12 pt: the loop
+  (`for (i = 200; i > 10; i -= 2)`) sets the font at the top of each pass, so the font keeps
+  the last size tried, 12, although the loop variable ends at 10. (Corrected in phase 3; this
+  line used to say 10.)
 - Draw in the 300x206 label: centred horizontally, vertically centred, word wrap, unlimited lines,
   clipped to the label. Text colour is the ink colour at full alpha.
 - No blend mode: plain text over the preview texture.
 
+**In the rewrite (phase 3).** `TextFitter` (`Layout/TextFitter.swift`) is this rule with its
+numbers as parameters: `TextFitter.preview` (300 x 206 box, 200 down to 12 by 2) and
+`TextFitter.shout` (420 x 280, 360 down to 12 by 2). It measures with
+`NSString.boundingRect` (word wrap, `usesLineFragmentOrigin`, height rounded up), the modern
+form of `sizeWithFont:constrainedToSize:lineBreakMode:`; a word wider than the box breaks
+between characters, as UILabel draws it. Empty text returns the maximum size (nothing is drawn).
+The preview draws the result in a `UILabel` (centred, word wrap, unlimited lines, clipped, as the
+original), scaled with the preview card (PLAN ruling 5).
+
 ### 6.2 Shout fit (`lettering` 0)
 
-- Text: saved `text`. Same loop with different numbers: start 360 pt, step 2, floor 10 (last tried
-  12), box 420 pt wide, fit when height <= 280 pt.
+- Text: saved `text`. Same loop with different numbers: start 360 pt, step 2, box 420 pt wide,
+  fit when height <= 280 pt; text that never fits is drawn at 12 pt, the last size tried (the
+  loop's `i > 10` bound; see 6.1).
 - The label (453x302, centred, word wrap, unlimited lines, vertically centred, clipped, label
   alpha 0.894 in the XIB) is rendered to a bitmap of its own bounds with a transparent background.
 - A 480x320 image is made: the texture drawn to fill, then the label bitmap drawn stretched to the
