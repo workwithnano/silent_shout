@@ -7,7 +7,7 @@ Statuses: `todo`, `in progress`, `done`.
 | # | Phase | Status | Commit | Notes |
 |---|---|---|---|---|
 | 0 | Plan and behaviour spec | done | | PLAN.md, SPEC.md, rulings on the spec's open points |
-| 1 | Scaffold | done | | Project, Makefile, asset catalog (113 image sets), fonts, `ShoutSettings` + option enums, placeholder screen. `make build`, `make test` (29 tests / 55 runs) and `make test-ui` (1 test) pass. See Notes. |
+| 1 | Scaffold | done | 818ec4a | Project, Makefile, asset catalog (113 image sets), fonts, `ShoutSettings` + option enums, placeholder screen. `make build`, `make test` (29 tests / 55 runs) and `make test-ui` (1 test) pass. See Notes. |
 | 2 | Options screen | todo | | |
 | 3 | Editing screen | todo | | |
 | 4 | Shout screen | todo | | |
