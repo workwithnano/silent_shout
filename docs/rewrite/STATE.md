@@ -8,7 +8,7 @@ Statuses: `todo`, `in progress`, `done`.
 |---|---|---|---|---|
 | 0 | Plan and behaviour spec | done | | PLAN.md, SPEC.md, rulings on the spec's open points |
 | 1 | Scaffold | done | 818ec4a | Project, Makefile, asset catalog (113 image sets), fonts, `ShoutSettings` + option enums, placeholder screen. `make build`, `make test` (29 tests / 55 runs) and `make test-ui` (1 test) pass. See Notes. |
-| 2 | Options screen | done | COMMIT | `OptionsView` as the root in a `NavigationStack`, three paged carousels (font, texture, lettering, top to bottom as in `MainView.xib`), page dots, persistence at 50% with clamping, 40-frame sizing loops, help button and 0.5 s overlay, Next to a stub Editing screen. `make build`, `make test` (42 tests / 7 suites) and `make test-ui` (5 tests) pass. Screenshots in `docs/rewrite/screenshots/`. See Notes. |
+| 2 | Options screen | done | 4d33108 | `OptionsView` as the root in a `NavigationStack`, three paged carousels (font, texture, lettering, top to bottom as in `MainView.xib`), page dots, persistence at 50% with clamping, 40-frame sizing loops, help button and 0.5 s overlay, Next to a stub Editing screen. `make build`, `make test` (42 tests / 7 suites) and `make test-ui` (5 tests) pass. Screenshots in `docs/rewrite/screenshots/`. See Notes. |
 | 3 | Editing screen | todo | | |
 | 4 | Shout screen | todo | | |
 | 5 | 1.0.1 additions, finished | todo | | |
