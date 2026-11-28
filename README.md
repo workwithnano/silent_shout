@@ -28,7 +28,9 @@ Results go to `build/`; test result bundles land in `build/Logs/Test/`.
 
 To run on a phone, open `SilentShout.xcodeproj`, choose your own team under Signing &
 Capabilities for the SilentShout target, and run. Keep that change local: no development team
-is committed, and the bundle id `com.corduroying.silentshout` is a placeholder.
+is committed. The bundle id is `com.corduroying.silentshout`.
+
+Releasing to TestFlight (version scheme, credentials, `make upload`): see `docs/release.md`.
 
 ## Project layout
 

@@ -27,7 +27,7 @@ partner agrees; nothing here assumes that he has).
 | Language mode | Swift 6, strict concurrency | Matches the other apps. |
 | Project | `SilentShout.xcodeproj` at the repo root, sources in `SilentShout/`, tests in `SilentShoutTests/` and `SilentShoutUITests/`, file-system-synchronized groups so nobody hand-edits pbxproj file lists | Avoids the pbxproj ID collisions Up There had. |
 | Tooling | A `Makefile` with `build`, `test`, `test-ui`, `clean`, using `~/Development/devtools/sim-lane.sh` the way `~/Development/upthere/Makefile` does | Shared simulator pool; one simulator job at a time. |
-| Bundle id | `com.corduroying.silentshout` as a placeholder, no development team committed | The original id belonged to Multi-Touchy-Feely. Decide for real before any release. |
+| Bundle id | `com.corduroying.silentshout` (decided by Nano 2026-11-28, registered in phase 8), no development team committed | The original id belonged to Multi-Touchy-Feely. |
 | Old code | `code/` is deleted on this branch in phase 1 (it stays on `master` and `1.0.1`). `assets/` stays untouched as the source archive; the app uses copies in its asset catalog. | Keeps the archive intact and the app target clean. |
 | Options offered | Exactly the options 1.0.1 offers. Unreachable fonts and the unoffered "swipe" sizing are not added. | "Same functionality". |
 | Original quirks | Kept where a user could see them as part of the app's character; crashes and layout bugs are not reproduced. Anything doubtful goes in `QUESTIONS.md` rather than being guessed. | |
@@ -121,12 +121,13 @@ AutoScrollLabel's origin, final `QUESTIONS.md`.
   trademark of Multi-Touchy-Feely, LLC.
 - Font licences: Kristi, Later On, Journal, Scriptina and Graffiti Paint Brush are freeware
   fonts with differing terms; check each allows bundling in a paid or free app.
-- A real bundle id, team, icon at current sizes, and a decision on iPad.
+- ~~A real bundle id~~ (decided 2026-11-28: `com.corduroying.silentshout`, registered), team (from `.env`, never committed), icon at current sizes, and a decision on iPad.
 
 Found during the rewrite (phases 1 to 6):
 
-- The bundle id (`com.corduroying.silentshout`) and version (`MARKETING_VERSION` 2.0, build 1)
-  are placeholders.
+- ~~The bundle id and version are placeholders.~~ Decided 2026-11-28: bundle id
+  `com.corduroying.silentshout` (registered), versions `YYYY.MM.PATCH` starting at 2026.11.0 (1).
+  See `docs/release.md`.
 - The app icon is the 2011 512 px art scaled up to 1024 px (QUESTIONS Q2). It needs larger
   source art or a redraw, and dark and tinted variants.
 - The deployment target is iOS 26, but only the iOS 27 simulator (iPhone 17 Pro, 402 pt wide)

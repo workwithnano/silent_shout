@@ -18,7 +18,7 @@ item in `QUESTIONS.md`; "PLAN defaults" is the table of decisions made by defaul
 | Behaviour | Status | Recorded in |
 |---|---|---|
 | Three screens (Options, Editing, Shout) in a navigation stack with the bar hidden, iPhone only | same | PLAN defaults (iOS 26, iPhone only) |
-| Product name "Silent Shout"; bundle id `com.multitouchyfeely.sshout` | deliberate change | PLAN defaults (placeholder `com.corduroying.silentshout`) |
+| Product name "Silent Shout"; bundle id `com.multitouchyfeely.sshout` | deliberate change | `com.corduroying.silentshout`, decided by Nano 2026-11-28 (PLAN, docs/release.md) |
 | Launch shows `poster_001`, then Options | deliberate change | Q3 (poster centred on a sampled colour) |
 | Black opaque status bar on Options and Editing | deliberate change | PLAN decisions, "Look" (screens run under the status bar on current iPhones) |
 | Next pushes Editing, animated | same | |
