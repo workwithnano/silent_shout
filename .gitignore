@@ -11,3 +11,7 @@ xcuserdata/
 *.xcuserdatad
 *.pbxuser
 *.mode1v3
+
+# Deployment credentials (see .env.example)
+.env
+.env.tmp
